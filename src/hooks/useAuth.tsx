@@ -12,12 +12,13 @@ export function useAuth() {
 
   const checkAdminRole = async (userId: string) => {
     try {
-      const { data } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
-        .maybeSingle();
+      // Use the SECURITY DEFINER has_role() function so the client never
+      // reads user_roles directly and cannot bypass RLS.
+      const { data, error } = await supabase.rpc('has_role', {
+        _user_id: userId,
+        _role: 'admin',
+      });
+      if (error) throw error;
       setIsAdmin(!!data);
     } catch {
       setIsAdmin(false);
