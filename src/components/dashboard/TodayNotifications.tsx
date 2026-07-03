@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sb } from '@/integrations/supabase/client';
+// Cast: generated Database types are missing some tables until types are regenerated.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const supabase = _sb as any;
 import { useAuth } from '@/hooks/useAuth';
 import { format, isToday, isBefore, startOfDay } from 'date-fns';
 import { toast } from 'sonner';

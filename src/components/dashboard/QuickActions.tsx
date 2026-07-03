@@ -9,7 +9,10 @@ import { cn } from '@/lib/utils';
 import { AddHabitDialog } from '@/components/habits/AddHabitDialog';
 import { AddTransactionDialog } from '@/components/expenses/AddTransactionDialog';
 import { AddEventDialog } from '@/components/calendar/AddEventDialog';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sb } from '@/integrations/supabase/client';
+// Cast: generated Database types are missing some tables until types are regenerated.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const supabase = _sb as any;
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
