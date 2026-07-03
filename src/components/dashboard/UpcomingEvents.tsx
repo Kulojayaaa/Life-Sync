@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sb } from '@/integrations/supabase/client';
+// Cast: generated Database types are missing some tables until types are regenerated.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const supabase = _sb as any;
 import { useAuth } from '@/hooks/useAuth';
 import { format, parseISO, isToday, isTomorrow, addDays } from 'date-fns';
 import { Calendar, Bell, CreditCard, Clock } from 'lucide-react';
