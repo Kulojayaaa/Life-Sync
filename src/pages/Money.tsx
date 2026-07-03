@@ -10,7 +10,7 @@ import { useFinanceStore } from '@/store/financeStore';
 export default function Money() {
   const { formatCurrency } = useCurrency();
   const store = useFinanceStore();
-  const balance = store.accounts.filter((a) => a.is_active !== false).reduce((sum, a) => sum + Number(a.computed_balance ?? a.current_balance ?? 0), 0);
+  const balance = store.accounts.filter((a) => a.is_active !== false).reduce((sum, a) => sum + Number((a as any).computed_balance ?? (a as any).current_balance ?? 0), 0);
   const cards = [
     ['/expenses', 'Transactions', `${store.transactions.length} recorded`, Receipt], ['/accounts', 'Accounts', formatCurrency(balance), WalletCards],
     ['/budgets', 'Budgets', `${store.budgets.length} active`, Target], ['/bills', 'Bills', 'View upcoming bills', Receipt],

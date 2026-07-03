@@ -42,7 +42,9 @@ export default function AdminDashboard() {
         .select('user_id, full_name, phone');
       if (profilesError) throw profilesError;
 
-      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+      const profileMap = new Map<string, { user_id: string; full_name: string | null; phone: string | null }>(
+        (profiles || []).map((p: any) => [p.user_id, p]),
+      );
 
       const merged: UserData[] = (authUsers || []).map((u: any) => ({
         id: u.id,

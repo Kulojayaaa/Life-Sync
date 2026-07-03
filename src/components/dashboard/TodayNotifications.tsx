@@ -111,7 +111,7 @@ export const useTodayNotifications = () => {
       // Add EMIs
       emis?.forEach(e => {
         const isOverdue = isBefore(new Date(e.due_date), todayStart);
-        const emiName = emiNameMap.get(e.emi_id) || 'EMI Payment';
+        const emiName = (emiNameMap.get(e.emi_id) as string | undefined) || 'EMI Payment';
         items.push({
           id: e.id,
           title: emiName,
