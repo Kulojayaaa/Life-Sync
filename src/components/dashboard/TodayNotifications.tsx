@@ -3,14 +3,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { format, isToday, isBefore, startOfDay } from 'date-fns';
 import { toast } from 'sonner';
-import { 
-  Bell, 
-  Calendar, 
-  CreditCard, 
+import {
+  Bell,
+  Calendar,
+  CreditCard,
   AlertTriangle,
-  CheckCircle2,
   Clock,
-  X
 } from 'lucide-react';
 import { useCurrency } from '@/hooks/CurrencyContext';
 
@@ -130,157 +128,77 @@ export const useTodayNotifications = () => {
   };
 
   const showNotifications = (items: TodayItem[]) => {
-    // Group items by type
-    const reminders = items.filter(i => i.type === 'reminder');
-    const events = items.filter(i => i.type === 'event');
-    const bills = items.filter(i => i.type === 'bill');
-    const emis = items.filter(i => i.type === 'emi');
-    const overdueItems = items.filter(i => i.isOverdue);
+    const overdue = items.filter((i) => i.isOverdue);
+    const reminders = items.filter((i) => i.type === 'reminder');
+    const events = items.filter((i) => i.type === 'event');
+    const bills = items.filter((i) => i.type === 'bill' && !i.isOverdue);
+    const emis = items.filter((i) => i.type === 'emi' && !i.isOverdue);
 
-    // Show overdue notification first (high priority)
-    if (overdueItems.length > 0) {
-      setTimeout(() => {
-        toast.error(
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 font-semibold">
-              <AlertTriangle className="h-4 w-4" />
-              <span>Overdue Items!</span>
-            </div>
-            <div className="text-sm opacity-90">
-              You have {overdueItems.length} overdue payment{overdueItems.length > 1 ? 's' : ''} that need attention
-            </div>
-          </div>,
-          {
-            duration: 8000,
-            className: 'bg-destructive text-destructive-foreground border-destructive',
-          }
-        );
-      }, 500);
+    // High-priority overdue alert stays as its own toast.
+    if (overdue.length > 0) {
+      toast.error(
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2 font-semibold">
+            <AlertTriangle className="h-4 w-4" />
+            <span>Overdue Items</span>
+          </div>
+          <div className="text-sm opacity-90">
+            {overdue.length} overdue payment{overdue.length > 1 ? 's' : ''} need attention
+          </div>
+        </div>,
+        { duration: 8000 },
+      );
     }
 
-    // Show today's reminders
-    if (reminders.length > 0) {
-      setTimeout(() => {
-        toast(
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 font-semibold text-blue-600">
-              <Bell className="h-4 w-4" />
-              <span>Today's Reminders</span>
-            </div>
-            <div className="text-sm space-y-1 mt-1">
-              {reminders.slice(0, 3).map(r => (
-                <div key={r.id} className="flex items-center gap-2">
-                  <Clock className="h-3 w-3 text-muted-foreground" />
-                  <span>{r.title}</span>
-                  {r.time && <span className="text-xs text-muted-foreground">at {r.time}</span>}
-                </div>
-              ))}
-              {reminders.length > 3 && (
-                <div className="text-xs text-muted-foreground">+{reminders.length - 3} more</div>
-              )}
-            </div>
-          </div>,
-          {
-            duration: 6000,
-            icon: null,
-          }
-        );
-      }, 1500);
-    }
+    // Everything else is collapsed into a single "Today" summary toast.
+    const others = reminders.length + events.length + bills.length + emis.length;
+    if (others === 0) return;
 
-    // Show today's events
-    if (events.length > 0) {
-      setTimeout(() => {
-        toast(
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 font-semibold text-purple-600">
-              <Calendar className="h-4 w-4" />
-              <span>Today's Events</span>
-            </div>
-            <div className="text-sm space-y-1 mt-1">
-              {events.slice(0, 3).map(e => (
-                <div key={e.id} className="flex items-center gap-2">
-                  <CheckCircle2 className="h-3 w-3 text-muted-foreground" />
-                  <span>{e.title}</span>
-                  {e.time && <span className="text-xs text-muted-foreground">at {e.time}</span>}
-                </div>
-              ))}
-              {events.length > 3 && (
-                <div className="text-xs text-muted-foreground">+{events.length - 3} more</div>
-              )}
-            </div>
-          </div>,
-          {
-            duration: 6000,
-            icon: null,
-          }
-        );
-      }, 2500);
-    }
+    const totalDue =
+      bills.reduce((s, b) => s + (b.amount || 0), 0) +
+      emis.reduce((s, e) => s + (e.amount || 0), 0);
 
-    // Show bills due today (non-overdue)
-    const todayBills = bills.filter(b => !b.isOverdue);
-    if (todayBills.length > 0) {
-      setTimeout(() => {
-        const totalAmount = todayBills.reduce((sum, b) => sum + (b.amount || 0), 0);
-        toast(
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 font-semibold text-orange-600">
-              <CreditCard className="h-4 w-4" />
-              <span>Bills Due Today</span>
-            </div>
-            <div className="text-sm space-y-1 mt-1">
-              {todayBills.slice(0, 3).map(b => (
-                <div key={b.id} className="flex items-center justify-between gap-2">
-                  <span>{b.title}</span>
-                  <span className="text-xs font-medium">{formatCurrency(b.amount || 0)}</span>
-                </div>
-              ))}
-              {todayBills.length > 3 && (
-                <div className="text-xs text-muted-foreground">+{todayBills.length - 3} more</div>
-              )}
-              <div className="pt-1 border-t text-xs font-semibold">
-                Total: {formatCurrency(totalAmount)}
+    setTimeout(() => {
+      toast(
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2 font-semibold text-primary">
+            <Bell className="h-4 w-4" />
+            <span>Today</span>
+          </div>
+          <div className="text-sm space-y-0.5 mt-1">
+            {reminders.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Clock className="h-3 w-3 text-muted-foreground" />
+                <span>{reminders.length} reminder{reminders.length > 1 ? 's' : ''}</span>
               </div>
-            </div>
-          </div>,
-          {
-            duration: 6000,
-            icon: null,
-          }
-        );
-      }, 3500);
-    }
-
-    // Show EMIs due today (non-overdue)
-    const todayEmis = emis.filter(e => !e.isOverdue);
-    if (todayEmis.length > 0) {
-      setTimeout(() => {
-        const totalAmount = todayEmis.reduce((sum, e) => sum + (e.amount || 0), 0);
-        toast(
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 font-semibold text-green-600">
-              <CreditCard className="h-4 w-4" />
-              <span>EMI Due Today</span>
-            </div>
-            <div className="text-sm space-y-1 mt-1">
-              {todayEmis.slice(0, 3).map(e => (
-                <div key={e.id} className="flex items-center justify-between gap-2">
-                  <span>{e.title}</span>
-                  <span className="text-xs font-medium">{formatCurrency(e.amount || 0)}</span>
-                </div>
-              ))}
-              <div className="pt-1 border-t text-xs font-semibold">
-                Total: {formatCurrency(totalAmount)}
+            )}
+            {events.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Calendar className="h-3 w-3 text-muted-foreground" />
+                <span>{events.length} event{events.length > 1 ? 's' : ''}</span>
               </div>
-            </div>
-          </div>,
-          {
-            duration: 6000,
-            icon: null,
-          }
-        );
-      }, 4500);
-    }
+            )}
+            {bills.length > 0 && (
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-3 w-3 text-muted-foreground" />
+                <span>{bills.length} bill{bills.length > 1 ? 's' : ''} due</span>
+              </div>
+            )}
+            {emis.length > 0 && (
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-3 w-3 text-muted-foreground" />
+                <span>{emis.length} EMI{emis.length > 1 ? 's' : ''} due</span>
+              </div>
+            )}
+            {totalDue > 0 && (
+              <div className="pt-1 border-t text-xs font-semibold">
+                Total due today: {formatCurrency(totalDue)}
+              </div>
+            )}
+          </div>
+        </div>,
+        { duration: 6000 },
+      );
+    }, 500);
   };
 };
