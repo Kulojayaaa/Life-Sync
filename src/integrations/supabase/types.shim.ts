@@ -24,6 +24,13 @@ export type Database = {
   };
 };
 
+// Helper aliases mirrored from the original generated file.
+export type Tables<_T extends string = string> = AnyRow;
+export type TablesInsert<_T extends string = string> = AnyRow;
+export type TablesUpdate<_T extends string = string> = AnyRow;
+export type Enums<_T extends string = string> = string;
+export type CompositeTypes<_T extends string = string> = AnyRow;
+
 export const Constants = {
   public: {
     Enums: {
