@@ -1,6 +1,6 @@
-# Finance App
+# LifeSync
 
-Production-ready personal finance app built with Vite, React, TypeScript, Zustand, Supabase, PWA support, and Capacitor Android.
+Production-ready personal finance + life-tracker app built with Vite, React, TypeScript, Zustand, Supabase, PWA support, and Capacitor Android. Developed on [Lovable](https://lovable.dev) with two-way GitHub sync — Lovable Cloud is the recommended backend for new forks.
 
 ## Features
 
