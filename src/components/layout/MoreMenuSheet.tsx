@@ -1,7 +1,7 @@
 import { Bell, FileText, Flag, KeyRound, Menu, Package, Receipt, Settings, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { forwardRef, useState } from 'react';
+import { useState } from 'react';
 
 const items = [
   ['/goals', 'Goals', Flag],
