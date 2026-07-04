@@ -1,22 +1,20 @@
-## Fix remaining TypeScript build errors, then publish
+## Enable Lovable Cloud to fix the blank page
 
-The remaining errors all trace back to `Tables<'emis'>` / `Tables<'emi_payments'>` imports still resolving to the strict generated types in files that import them directly (e.g. `EmiCard.tsx`). The permissive shim is wired via tsconfig `paths`, but strict fields like `is_paid`, `principal_component`, `initial_balance`, `start_time` still fail elsewhere.
+The published/preview site fails at load with `Missing VITE_SUPABASE_URL and Supabase anon/publishable key` because Lovable Cloud isn't connected — Supabase URL/key are never injected, and `supabaseClient.ts` throws before React mounts.
 
 ### Steps
 
-1. **Verify the shim is actually being picked up** by running `tsgo` and collecting the current error list (post-shim). Errors like `Property 'is_paid' does not exist` on `EmiCard.tsx` suggest the path override isn't resolving for that import — investigate whether Vite/TS resolves `@/integrations/supabase/types` to the shim consistently.
-2. **Force the override reliably** by replacing the contents of `src/integrations/supabase/types.ts` itself with a re-export of the shim (`export * from './types.shim'`). This avoids relying on tsconfig `paths` at all and guarantees every importer gets the permissive types. Then remove the `paths` overrides from `tsconfig.json` and `tsconfig.app.json`.
-3. **Re-run typecheck** and fix any residual issues (expected: none, since `Tables<T>` now returns `AnyRow`).
-4. **Publish** the app via `preview_ui--publish` once the build is green.
+1. **Enable Lovable Cloud** via `supabase--enable`. This provisions Supabase, injects `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`, and regenerates `src/integrations/supabase/types.ts` from the real schema.
+2. **Verify the preview loads** (root URL renders, no console error).
+3. **Remove the type shim workaround** once the generated `types.ts` is current:
+   - Delete `src/integrations/supabase/types.shim.ts`
+   - Drop the `@/integrations/supabase/types` `paths` override from `tsconfig.json` and `tsconfig.app.json`
+   - Restore proper typing in `src/lib/supabaseClient.ts` (`createClient<Database>(...)`) and `src/integrations/supabase/client.ts` (drop `as any`)
+   - Remove the per-file `as any` casts in `AddEventDialog.tsx`, `QuickActions.tsx`, `TodayNotifications.tsx`, `UpcomingEvents.tsx`
+4. **Run typecheck**; fix any residual type mismatches now that real types are back.
+5. **Re-publish**.
 
-### Technical notes
+### Notes
 
-- Overwriting `types.ts` is safe: when Cloud is later connected and types are regenerated, that file will be replaced with fresh generated content and the shim can be deleted.
-- No runtime behavior changes; this is purely a type-layer fix.
-- No new dependencies.
-
-### Files to change
-
-- `src/integrations/supabase/types.ts` — replace with `export * from './types.shim';`
-- `tsconfig.json` — drop the `@/integrations/supabase/types` path override
-- `tsconfig.app.json` — drop the `@/integrations/supabase/types` path override
+- No schema changes in this step — Cloud enable + type re-sync only.
+- If typecheck surfaces genuine schema drift (columns the code assumes but migrations don't have), I'll flag them for a follow-up migration rather than silently loosening types again.
