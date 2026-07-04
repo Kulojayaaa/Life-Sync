@@ -12,6 +12,8 @@
         "./src/integrations/supabase/types.shim.ts"
       ]
     },
+
+
     "skipLibCheck": true,
     "strictNullChecks": false
   },

@@ -24,6 +24,8 @@
         "./src/integrations/supabase/types.shim.ts"
       ]
     },
+
+
     "skipLibCheck": true,
     "strict": false,
     "target": "ES2020",
