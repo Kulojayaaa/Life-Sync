@@ -75,16 +75,10 @@ export default function Vault() {
 
     setLoading(true);
     try {
-      const { data: migrated, error: migrateError } = await supabase.rpc('migrate_legacy_passwords', { vault_key: masterKey });
-      if (migrateError) throw migrateError;
       localStorage.setItem(VAULT_KEY_STORAGE, masterKey);
       await fetchPasswords(masterKey);
       setVaultUnlocked(true);
-      if (migrated && migrated > 0) {
-        toast.success(`${migrated} legacy vault item${migrated === 1 ? '' : 's'} encrypted`);
-      } else {
-        toast.success('Vault unlocked');
-      }
+      toast.success('Vault unlocked');
     } catch (error: any) {
       toast.error(error.message || 'Failed to unlock vault. Check that the encryption migration has run.');
       setLoading(false);
