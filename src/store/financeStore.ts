@@ -124,7 +124,7 @@ async function syncDefaultCategories(userId: string, existingCategories: Finance
 
 async function fetchTransactions(userId: string, categoryLookup: Map<string, FinanceCategory>) {
   let supportsCategoryIds = true;
-  let response = await supabase
+  let response: any = await supabase
     .from('transactions')
     .select(TRANSACTION_SELECT_WITH_CATEGORY_ID)
     .eq('user_id', userId)
