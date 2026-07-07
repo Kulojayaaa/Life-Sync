@@ -185,7 +185,7 @@ async function fetchBudgets(userId: string, categoryLookup: Map<string, FinanceC
       .from('budgets')
       .select('id, planned_amount, month, category_id, created_at')
       .eq('user_id', userId)
-      .eq('month', monthKey)
+      .eq('month', monthKey as any)
       .order('created_at', { ascending: false });
   }
 

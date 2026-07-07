@@ -1233,7 +1233,7 @@ export default function Expenses({ initialTab = 'transactions' }: ExpensesProps)
                       <EmiCard
                         key={emi.id}
                         emi={emi}
-                        payments={emiPayments.filter((payment) => payment.emi_id === emi.id)}
+                        payments={emiPayments.filter((payment) => payment.emi_id === emi.id) as any}
                         onPaymentToggle={toggleEmiPayment}
                         onDelete={setDeletingEmi}
                       />
