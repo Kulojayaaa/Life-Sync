@@ -162,7 +162,7 @@ async function fetchBudgets(userId: string, categoryLookup: Map<string, FinanceC
   const monthKey = getMonthKey();
   const { month, year } = parseMonthKey(monthKey);
   let supportsCategoryIds = true;
-  let response = await supabase
+  let response: any = await supabase
     .from('budgets')
     .select(BUDGET_SELECT_WITH_CATEGORY_ID)
     .eq('user_id', userId)
