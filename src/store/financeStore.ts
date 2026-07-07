@@ -124,7 +124,7 @@ async function syncDefaultCategories(userId: string, existingCategories: Finance
 
 async function fetchTransactions(userId: string, categoryLookup: Map<string, FinanceCategory>) {
   let supportsCategoryIds = true;
-  let response = await supabase
+  let response: any = await supabase
     .from('transactions')
     .select(TRANSACTION_SELECT_WITH_CATEGORY_ID)
     .eq('user_id', userId)
@@ -162,7 +162,7 @@ async function fetchBudgets(userId: string, categoryLookup: Map<string, FinanceC
   const monthKey = getMonthKey();
   const { month, year } = parseMonthKey(monthKey);
   let supportsCategoryIds = true;
-  let response = await supabase
+  let response: any = await supabase
     .from('budgets')
     .select(BUDGET_SELECT_WITH_CATEGORY_ID)
     .eq('user_id', userId)
@@ -185,7 +185,7 @@ async function fetchBudgets(userId: string, categoryLookup: Map<string, FinanceC
       .from('budgets')
       .select('id, planned_amount, month, category_id, created_at')
       .eq('user_id', userId)
-      .eq('month', monthKey)
+      .eq('month', monthKey as any)
       .order('created_at', { ascending: false });
   }
 
