@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => {
       react(),
       {
         name: "inject-public-backend-env",
-        transformIndexHtml(html) {
+        transformIndexHtml(html: string) {
           if (!supabaseUrl || !supabasePublishableKey) return html;
 
           return html.replace(
