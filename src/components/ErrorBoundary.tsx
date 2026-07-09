@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
+  resetKey?: string | number;
 }
 
 interface ErrorBoundaryState {
@@ -14,6 +15,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   static getDerivedStateFromError(error: Error) {
     return { error };
+  }
+
+  componentDidUpdate(prev: ErrorBoundaryProps) {
+    if (this.state.error && prev.resetKey !== this.props.resetKey) {
+      this.setState({ error: null });
+    }
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
