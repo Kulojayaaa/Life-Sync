@@ -1,5 +1,5 @@
 import { addMonths, format } from 'date-fns';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 import {
   computeBudgetUsage,
   FinanceBudget,
