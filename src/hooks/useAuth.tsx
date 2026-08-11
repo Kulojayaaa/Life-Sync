@@ -53,8 +53,8 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, [setGlobalUser]);
 
-  const signUp = async (email: string, password: string, fullName?: string) => {
-    const redirectUrl = `${window.location.origin}/`;
+  const signUp = async (email: string, password: string, fullName?: string, redirectTo?: string) => {
+    const redirectUrl = `${window.location.origin}${redirectTo ?? '/'}`;
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -71,8 +71,8 @@ export function useAuth() {
     return { data, error };
   };
 
-  const signInWithMagicLink = async (email: string) => {
-    const redirectUrl = `${window.location.origin}/`;
+  const signInWithMagicLink = async (email: string, redirectTo?: string) => {
+    const redirectUrl = `${window.location.origin}${redirectTo ?? '/'}`;
     const { data, error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -82,6 +82,7 @@ export function useAuth() {
     });
     return { data, error };
   };
+
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
