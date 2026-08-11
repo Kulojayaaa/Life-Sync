@@ -31,7 +31,9 @@ const Reminders = lazy(() => import("./pages/Reminders"));
 const Settings = lazy(() => import("./pages/Settings"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const Vault = lazy(() => import("./pages/Vault"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+
 
 const queryClient = new QueryClient();
 
@@ -44,10 +46,13 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
+  const nextParam = new URLSearchParams(window.location.search).get("next");
+  const safeNext = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/";
   if (loading) return <FullPageLoader label="Loading authentication..." />;
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to={safeNext} replace />;
   return <>{children}</>;
 }
+
 
 const App = () => (
   <ErrorBoundary>
@@ -62,6 +67,8 @@ const App = () => (
                 <Suspense fallback={<FullPageLoader label="Loading module..." />}>
                   <Routes>
                     <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
+                    <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
+
                     <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                     <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
                     <Route path="/habits" element={<ProtectedRoute><Habits /></ProtectedRoute>} />

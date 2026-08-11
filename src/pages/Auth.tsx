@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +39,10 @@ type SignupValues = z.infer<typeof signupSchema>;
 export default function Auth() {
   const { signIn, signInWithMagicLink, signUp, loading } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const rawNext = searchParams.get('next');
+  // Only same-origin relative paths are honoured as a post-auth redirect.
+  const nextPath = rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/';
   const [activeTab, setActiveTab] = useState<'magic' | 'login' | 'signup'>('magic');
 
   const loginForm = useForm<LoginValues>({
@@ -66,7 +71,7 @@ export default function Auth() {
   });
 
   const handleMagicLink = magicLinkForm.handleSubmit(async (values) => {
-    const { error } = await signInWithMagicLink(values.email);
+    const { error } = await signInWithMagicLink(values.email, nextPath);
 
     if (error) {
       toast({
@@ -102,10 +107,11 @@ export default function Auth() {
       title: 'Welcome back!',
       description: 'Successfully logged in.',
     });
+    if (nextPath !== '/') window.location.href = nextPath;
   });
 
   const handleSignup = signupForm.handleSubmit(async (values) => {
-    const { error } = await signUp(values.email, values.password, values.fullName);
+    const { error } = await signUp(values.email, values.password, values.fullName, nextPath);
 
     if (error) {
       const message = error.message.includes('already registered')
