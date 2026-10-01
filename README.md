@@ -24,7 +24,7 @@ Production-ready personal finance + life-tracker app built with Vite, React, Typ
 
    ```env
    VITE_SUPABASE_URL=https://your-project.supabase.co
-   VITE_SUPABASE_ANON_KEY=your-anon-public-key
+  VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
    ```
 
 3. Start the app:
@@ -41,7 +41,7 @@ Production-ready personal finance + life-tracker app built with Vite, React, Typ
 
 ## Supabase Setup
 
-Apply all SQL migrations in `supabase/migrations/` in filename order. With the Supabase CLI:
+Apply the clean baseline migration in `supabase/migrations/`. Historical migrations are retained in `supabase/migrations_legacy/` for reference and must not be applied to a fresh project. With the Supabase CLI:
 
 ```sh
 supabase link --project-ref <your-project-ref>
@@ -56,12 +56,37 @@ SELECT pg_notify('pgrst', 'reload schema');
 
 The finance schema includes RLS policies scoped by `user_id = auth.uid()`, realtime coverage for ledger tables, balance recalculation triggers, EMI schedule support, and compatibility columns requested for production finance tracking.
 
+## Vercel Deployment
+
+The included `vercel.json` configures the Vite build, SPA route fallback, service-worker cache behavior, and production security headers.
+
+1. Import the Git repository into Vercel.
+2. Add these environment variables for Production, Preview, and Development:
+
+   ```env
+   VITE_SUPABASE_PROJECT_ID=your-project-ref
+   VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+   VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+   VITE_APP_URL=https://your-project.vercel.app
+   ```
+
+3. Deploy using the detected Vite settings, or run `vercel --prod` locally.
+4. Add the final Vercel URL to Supabase Authentication URL Configuration as the Site URL.
+5. Add both callback patterns to the allowed redirect URLs:
+
+   ```text
+   http://127.0.0.1:8080/auth/callback
+   https://your-project.vercel.app/auth/callback
+   ```
+
+Email confirmations and magic links now open `/auth/callback`, which displays an explicit success or failure message before continuing into LifeSync.
+
 ## Android Setup
 
 Capacitor is already initialized with:
 
-- App ID: `com.finance.app`
-- App name: `Finance App`
+- App ID: `com.lifesync.app`
+- App name: `LifeSync`
 - Web directory: `dist`
 
 Useful commands:
@@ -87,17 +112,17 @@ sdk.dir=C\:\\Users\\<you>\\AppData\\Local\\Android\\Sdk
 
 ## Release APK
 
-Unsigned release build:
+Release build:
 
 ```sh
 cd android
 .\gradlew.bat assembleRelease
 ```
 
-The unsigned APK is written to:
+When signing is configured, the signed APK is written to:
 
 ```text
-android/app/build/outputs/apk/release/app-release-unsigned.apk
+android/app/build/outputs/apk/release/app-release.apk
 ```
 
 For a signed APK, create a keystore in Android Studio or with `keytool`, then copy `android/keystore.properties.example` to `android/keystore.properties` and fill in the keystore path/passwords. After that:
@@ -115,7 +140,9 @@ Android Studio path: **Build -> Generate Signed Bundle / APK**.
 | --- | --- |
 | `npm run dev` | Start Vite dev server |
 | `npm run build` | Production web build |
+| `npm run typecheck` | TypeScript validation |
+| `npm run verify` | Type check, lint, and production build |
 | `npm run lint` | ESLint checks |
 | `npm run android:sync` | Build web and sync Android assets |
+| `npm run android:release` | Sync and assemble the signed Android release |
 | `npm run android:open` | Open Android Studio project |
-

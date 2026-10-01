@@ -27,6 +27,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tables } from '@/integrations/supabase/types';
+import { LifeSyncLogo } from '@/components/branding/LifeSyncLogo';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
@@ -87,7 +88,7 @@ export function Sidebar() {
       {/* Logo */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-border">
         <Link to="/" className="flex items-center gap-3">
-          <img src="/icon-192.png" alt="LifeSync logo" className="h-12 w-12 flex-shrink-0 rounded-2xl object-cover shadow-sm" />
+          <LifeSyncLogo size="sm" />
           {!collapsed && (
             <span className="text-xl font-bold text-foreground">LifeSync</span>
           )}

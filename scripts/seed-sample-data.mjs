@@ -21,10 +21,25 @@ if (!email || !password || !supabaseUrl || !supabaseKey) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
-const today = '2026-05-02';
-const month = '2026-05';
-const marker = `Audit Sample ${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}`;
+const now = new Date();
+const appTimeZone = process.env.APP_TIME_ZONE || 'Asia/Kolkata';
+const today = new Intl.DateTimeFormat('en-CA', {
+  timeZone: appTimeZone,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+}).format(now);
+const month = today.slice(0, 7);
+const currentYear = Number(today.slice(0, 4));
+const currentMonth = Number(today.slice(5, 7));
+const marker = `Demo Sample ${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}`;
 const report = [];
+
+function dateOffset(days) {
+  const value = new Date(`${today}T12:00:00Z`);
+  value.setUTCDate(value.getUTCDate() + days);
+  return value.toISOString().slice(0, 10);
+}
 
 function missingColumn(error) {
   const text = `${error?.message || ''} ${error?.details || ''}`;
@@ -102,8 +117,8 @@ await upsertOne(
   'profiles',
   {
     user_id: userId,
-    full_name: 'Pankara Dithya Audit User',
-    phone: '+91 98765 43210',
+    full_name: 'LifeSync Demo User',
+    phone: '+91 90000 00000',
     avatar_url: null,
   },
   'user_id',
@@ -206,8 +221,8 @@ await insertOne('budgets', {
   category_id: foodCategory?.id,
   category: foodCategory?.name || 'Food',
   amount: 15000,
-  month: 5,
-  year: 2026,
+  month: currentMonth,
+  year: currentYear,
   carry_forward: true,
   rollover_amount: 1200,
   color: '#F97316',
@@ -218,12 +233,20 @@ const savingsGoal = await insertOne('savings_goals', {
   name: `${marker} Emergency Fund`,
   target_amount: 200000,
   current_amount: 65000,
-  deadline: '2026-12-31',
+  deadline: dateOffset(180),
   account_id: bank?.id,
   color: '#EC4899',
   icon: 'Safe',
   is_completed: false,
 }, 'Savings goal');
+
+if (savingsGoal) {
+  await insertOne('goal_contributions', {
+    user_id: userId,
+    goal_id: savingsGoal.id,
+    amount: 5000,
+  }, 'Savings goal contribution');
+}
 
 const emi = await insertOne('emis', {
   user_id: userId,
@@ -232,7 +255,7 @@ const emi = await insertOne('emis', {
   interest_rate: 10.5,
   total_months: 12,
   emi_amount: 10550,
-  start_date: '2026-05-01',
+  start_date: today,
   due_day: 7,
   notes: `${marker} test EMI details`,
   is_active: true,
@@ -243,7 +266,7 @@ if (emi) {
     user_id: userId,
     emi_id: emi.id,
     month_number: 1,
-    due_date: '2026-05-07',
+    due_date: dateOffset(5),
     paid_date: null,
     is_paid: false,
     principal_component: 9550,
@@ -257,11 +280,11 @@ const bill = await insertOne('bills', {
   name: `${marker} Broadband Bill`,
   provider: 'FiberNet Sample',
   amount: 1499,
-  due_date: '2026-05-10',
+  due_date: dateOffset(3),
   billing_cycle: 'monthly',
   is_recurring: true,
   reminder_days_before: 3,
-  last_paid_date: '2026-04-10',
+  last_paid_date: dateOffset(-30),
   is_paid: false,
   notes: `${marker} bill note`,
   icon: 'Bill',
@@ -272,7 +295,7 @@ if (bill) {
   await insertOne('bill_payment_history', {
     user_id: userId,
     bill_id: bill.id,
-    paid_date: '2026-04-10',
+    paid_date: dateOffset(-30),
     amount: 1499,
     notes: `${marker} previous bill payment`,
   }, 'Bill payment history');
@@ -282,7 +305,7 @@ const product = await insertOne('product_usage', {
   user_id: userId,
   name: `${marker} Coffee Beans`,
   category: 'groceries',
-  last_purchase_date: '2026-04-25',
+  last_purchase_date: dateOffset(-10),
   quantity: 1,
   unit: 'kg',
   cost: 850,
@@ -297,7 +320,7 @@ if (product) {
   await insertOne('product_purchase_history', {
     user_id: userId,
     product_id: product.id,
-    purchase_date: '2026-04-25',
+    purchase_date: dateOffset(-10),
     quantity: 1,
     unit: 'kg',
     cost: 850,
@@ -333,7 +356,7 @@ const goal = await insertOne('goals', {
   title: `${marker} Learn TypeScript`,
   description: `${marker} goal description`,
   category: 'learning',
-  target_date: '2026-08-31',
+  target_date: dateOffset(120),
   is_completed: false,
   progress: 45,
   color: '#8B5CF6',
@@ -371,7 +394,7 @@ await insertOne('reminders', {
   user_id: userId,
   title: `${marker} Call accountant`,
   description: `${marker} reminder description`,
-  reminder_date: '2026-05-04',
+  reminder_date: dateOffset(1),
   reminder_time: '10:30',
   type: 'custom',
   is_recurring: true,
@@ -384,7 +407,7 @@ await insertOne('calendar_events', {
   user_id: userId,
   title: `${marker} Budget Review`,
   description: `${marker} calendar event description`,
-  event_date: '2026-05-05',
+  event_date: dateOffset(2),
   event_type: 'plan',
   color: '#8B5CF6',
   all_day: false,
@@ -412,10 +435,10 @@ await upsertOne('monthly_plan', {
 }, 'user_id,month', 'Monthly plan');
 
 const { error: vaultError } = await supabase.rpc('save_password', {
-  vault_key: process.env.SAMPLE_VAULT_KEY || 'AuditSampleVaultKey2026',
+  vault_key: process.env.SAMPLE_VAULT_KEY || 'LifeSyncDemoVault2026',
   entry_title: `${marker} Demo Login`,
   entry_username: 'sample-login@example.com',
-  entry_password: 'SamplePassword#2026',
+  entry_password: 'DemoVaultPassword#2026',
   entry_url: 'https://example.com',
   entry_notes: `${marker} encrypted vault sample`,
 });

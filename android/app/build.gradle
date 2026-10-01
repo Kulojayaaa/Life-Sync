@@ -1,9 +1,15 @@
 apply plugin: 'com.android.application'
 
-def releaseStoreFile = System.getenv('LIFESYNC_KEYSTORE_FILE')
-def releaseStorePassword = System.getenv('LIFESYNC_KEYSTORE_PASSWORD')
-def releaseKeyAlias = System.getenv('LIFESYNC_KEY_ALIAS')
-def releaseKeyPassword = System.getenv('LIFESYNC_KEY_PASSWORD')
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+def releaseStoreFile = System.getenv('LIFESYNC_KEYSTORE_FILE') ?: keystoreProperties['storeFile']
+def releaseStorePassword = System.getenv('LIFESYNC_KEYSTORE_PASSWORD') ?: keystoreProperties['storePassword']
+def releaseKeyAlias = System.getenv('LIFESYNC_KEY_ALIAS') ?: keystoreProperties['keyAlias']
+def releaseKeyPassword = System.getenv('LIFESYNC_KEY_PASSWORD') ?: keystoreProperties['keyPassword']
 
 android {
     namespace = "com.lifesync.app"

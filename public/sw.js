@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finance-app-v2';
+const CACHE_NAME = 'lifesync-v3';
 const APP_SHELL = ['/', '/manifest.json', '/favicon.ico'];
 
 self.addEventListener('install', (event) => {
@@ -23,7 +23,12 @@ self.addEventListener('fetch', (event) => {
   const isVersionedAsset = isSameOrigin && url.pathname.startsWith('/assets/');
 
   if (isVersionedAsset || event.request.destination === 'script' || event.request.destination === 'style') {
-    event.respondWith(fetch(event.request));
+    event.respondWith(
+      caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
+        if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
+        return response;
+      })),
+    );
     return;
   }
 

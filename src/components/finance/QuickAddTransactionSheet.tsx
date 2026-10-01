@@ -63,15 +63,20 @@ export function QuickAddTransactionSheet() {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!user || !accountId || !Number(amount) || (type !== 'transfer' && !categoryId)) {
+    const parsedAmount = Number(amount);
+    if (!user || !accountId || !Number.isFinite(parsedAmount) || parsedAmount <= 0 || (type !== 'transfer' && !categoryId)) {
       toast.error('Enter an amount, account, and category.');
+      return;
+    }
+    if (type === 'transfer' && (!transferAccountId || transferAccountId === accountId)) {
+      toast.error('Choose a different destination account.');
       return;
     }
     const category = categories.find((item) => item.id === categoryId);
     const input: TransactionInput = {
       userId: user.id, accountId, categoryId: type === 'transfer' ? null : categoryId,
       categoryName: type === 'transfer' ? 'Transfer' : category?.name || 'Other', type,
-      amount: Number(amount), date, notes: notes || null, paymentMode: paymentMode || null,
+      amount: parsedAmount, date, notes: notes.trim() || null, paymentMode: paymentMode.trim() || null,
       transferAccountId: type === 'transfer' ? transferAccountId : null,
       spendingType: type === 'debit' ? spendingType : null, supportsCategoryIds: supportsTransactionCategoryIds,
     };
@@ -105,7 +110,7 @@ export function QuickAddTransactionSheet() {
             {([['debit', 'Expense'], ['credit', 'Income'], ['transfer', 'Transfer']] as const).map(([value, label]) =>
               <Button key={value} type="button" variant={type === value ? 'default' : 'outline'} onClick={() => setType(value)}>{label}</Button>)}
           </div>
-          <div><Label htmlFor="quick-amount">Amount</Label><Input id="quick-amount" autoFocus inputMode="decimal" type="number" min="0.01" step="0.01" className="h-14 text-2xl" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
+          <div><Label htmlFor="quick-amount">Amount</Label><Input id="quick-amount" autoFocus inputMode="decimal" type="number" min="0.01" step="0.01" className="h-14 text-2xl" value={amount} onChange={(e) => setAmount(e.target.value)} required /></div>
           <div><Label>Account</Label><Select value={accountId} onValueChange={setAccountId}><SelectTrigger className="h-12"><SelectValue placeholder="Choose account" /></SelectTrigger><SelectContent>{accounts.map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}</SelectContent></Select></div>
           {type === 'transfer' ? <div><Label>Destination account</Label><Select value={transferAccountId} onValueChange={setTransferAccountId}><SelectTrigger className="h-12"><SelectValue placeholder="Choose destination" /></SelectTrigger><SelectContent>{accounts.filter((item) => item.id !== accountId).map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}</SelectContent></Select></div>
             : <div><Label>Category</Label><Select value={categoryId} onValueChange={setCategoryId}><SelectTrigger className="h-12"><SelectValue placeholder="Choose category" /></SelectTrigger><SelectContent>{availableCategories.map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}</SelectContent></Select></div>}

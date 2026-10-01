@@ -13,6 +13,7 @@ import { lazy, Suspense } from "react";
 
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const Goals = lazy(() => import("./pages/Goals"));
 const Habits = lazy(() => import("./pages/Habits"));
 const Expenses = lazy(() => import("./pages/Expenses"));
@@ -53,6 +54,14 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading, isAdmin } = useAuth();
+  if (loading) return <FullPageLoader label="Checking permissions..." />;
+  if (!user) return <Navigate to="/auth" replace />;
+  if (!isAdmin) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
 
 const App = () => (
   <ErrorBoundary>
@@ -67,6 +76,7 @@ const App = () => (
                 <Suspense fallback={<FullPageLoader label="Loading module..." />}>
                   <Routes>
                     <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
                     <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
 
                     <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
@@ -87,7 +97,7 @@ const App = () => (
                     <Route path="/reminders" element={<ProtectedRoute><Reminders /></ProtectedRoute>} />
                     <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                     <Route path="/vault" element={<ProtectedRoute><Vault /></ProtectedRoute>} />
-                    <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+                    <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

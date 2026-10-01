@@ -23,14 +23,14 @@ interface PasswordEntry {
   updated_at?: string;
 }
 
-const VAULT_KEY_STORAGE = 'fintrack:vault-master-key';
-
 export default function Vault() {
   const { user } = useAuth();
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
-  const [masterKey, setMasterKey] = useState(() => localStorage.getItem(VAULT_KEY_STORAGE) || '');
+  // Keep the vault key in memory only. Persisting it beside the session token
+  // would let any script running in this origin decrypt the vault.
+  const [masterKey, setMasterKey] = useState('');
   const [vaultUnlocked, setVaultUnlocked] = useState(false);
   
   // Dialog state
@@ -49,7 +49,7 @@ export default function Vault() {
     setShowPasswordMap({});
     setVaultUnlocked(false);
     setLoading(false);
-    setMasterKey(localStorage.getItem(VAULT_KEY_STORAGE) || '');
+    setMasterKey('');
   }, [user]);
 
   const fetchPasswords = async (key = masterKey) => {
@@ -75,7 +75,6 @@ export default function Vault() {
 
     setLoading(true);
     try {
-      localStorage.setItem(VAULT_KEY_STORAGE, masterKey);
       await fetchPasswords(masterKey);
       setVaultUnlocked(true);
       toast.success('Vault unlocked');
@@ -152,7 +151,7 @@ export default function Vault() {
         <Alert className="bg-primary/5 border-primary/20">
           <AlertTriangle className="h-4 w-4 text-primary" />
           <AlertTitle>Encrypted vault</AlertTitle>
-          <AlertDescription>Use your saved vault key to unlock credentials.</AlertDescription>
+          <AlertDescription>Your vault key stays in memory only and is cleared when you sign out or close the app.</AlertDescription>
         </Alert>
 
         {!vaultUnlocked && (

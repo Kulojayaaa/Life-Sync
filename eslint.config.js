@@ -5,7 +5,8 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "android", "node_modules", "node_modules-incomplete", ".npm-cache"] },
+  // Supabase Edge Functions run on Deno and require their own lint profile.
+  { ignores: ["dist", "android", "node_modules", "node_modules-incomplete", ".npm-cache", "supabase/functions"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],

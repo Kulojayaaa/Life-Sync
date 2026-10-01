@@ -7,7 +7,6 @@ const toAuthError = (error: unknown) => {
   if (error instanceof Error) return error;
   return new Error('Authentication request failed. Please try again.');
 };
-
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -58,9 +57,18 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, [setGlobalUser]);
 
+  const buildAuthCallbackUrl = (flow: 'signup' | 'magic', redirectTo?: string) => {
+    const configuredUrl = import.meta.env.VITE_APP_URL?.trim();
+    const appUrl = configuredUrl || window.location.origin;
+    const callbackUrl = new URL('/auth/callback', appUrl);
+    callbackUrl.searchParams.set('flow', flow);
+    callbackUrl.searchParams.set('next', redirectTo ?? '/');
+    return callbackUrl.toString();
+  };
+
   const signUp = async (email: string, password: string, fullName?: string, redirectTo?: string) => {
     try {
-      const redirectUrl = `${window.location.origin}${redirectTo ?? '/'}`;
+      const redirectUrl = buildAuthCallbackUrl('signup', redirectTo);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -86,7 +94,7 @@ export function useAuth() {
 
   const signInWithMagicLink = async (email: string, redirectTo?: string) => {
     try {
-      const redirectUrl = `${window.location.origin}${redirectTo ?? '/'}`;
+      const redirectUrl = buildAuthCallbackUrl('magic', redirectTo);
       const { data, error } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -99,6 +107,7 @@ export function useAuth() {
       return { data: null, error: toAuthError(error) };
     }
   };
+
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();

@@ -13,7 +13,7 @@ import { useCurrency, CurrencyCode } from '@/hooks/CurrencyContext';
 import { useTheme, Theme } from '@/hooks/ThemeContext';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { User, LogOut, Save, Download, Trash2, Sun, Moon, Monitor, AlertTriangle, Camera, Loader2, X, Key, Eye, EyeOff } from 'lucide-react';
+import { User, LogOut, Save, Download, Trash2, Sun, Moon, Monitor, AlertTriangle, Camera, Loader2, X } from 'lucide-react';
 import { Tables } from '@/integrations/supabase/types';
 import { exportToCSV } from '@/lib/export';
 
@@ -26,8 +26,6 @@ const CURRENCIES: { value: CurrencyCode; label: string }[] = [
   { value: 'SGD', label: 'Singapore Dollar (S$)' },
 ];
 
-const VAULT_KEY_STORAGE = 'fintrack:vault-master-key';
-
 export default function Settings() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -39,16 +37,10 @@ export default function Settings() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingData, setDeletingData] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [vaultKey, setVaultKey] = useState('');
-  const [showVaultKey, setShowVaultKey] = useState(false);
 
   useEffect(() => {
     if (user) fetchProfile();
   }, [user]);
-
-  useEffect(() => {
-    setVaultKey(localStorage.getItem(VAULT_KEY_STORAGE) || '');
-  }, []);
 
   const fetchProfile = async () => {
     try {
@@ -151,17 +143,6 @@ export default function Settings() {
   const handleSignOut = async () => {
     await signOut();
     navigate('/auth');
-  };
-
-  const saveVaultKey = () => {
-    if (!vaultKey.trim()) {
-      localStorage.removeItem(VAULT_KEY_STORAGE);
-      toast.success('Vault key cleared');
-      return;
-    }
-
-    localStorage.setItem(VAULT_KEY_STORAGE, vaultKey.trim());
-    toast.success('Vault key saved on this device');
   };
 
   const getInitials = (name: string | null) => {
@@ -338,7 +319,6 @@ export default function Settings() {
         toast.error(`Some tables failed to delete (${failures.length}). Check console.`);
         console.error('deleteAllData failures:', failures);
       } else {
-        localStorage.removeItem(VAULT_KEY_STORAGE);
         toast.success('All app data deleted');
         setShowDeleteDialog(false);
         await signOut();
@@ -467,33 +447,6 @@ export default function Settings() {
               <p className="text-xs text-muted-foreground">Preference is saved and applied instantly</p>
             </div>
 
-            <div className="space-y-2">
-              <Label>Vault Key</Label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Input
-                    type={showVaultKey ? 'text' : 'password'}
-                    value={vaultKey}
-                    onChange={(e) => setVaultKey(e.target.value)}
-                    placeholder="Set vault key"
-                    className="pr-10"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
-                    onClick={() => setShowVaultKey((value) => !value)}
-                  >
-                    {showVaultKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </Button>
-                </div>
-                <Button type="button" variant="outline" onClick={saveVaultKey}>
-                  <Key className="w-4 h-4 mr-2" />
-                  Save
-                </Button>
-              </div>
-            </div>
           </CardContent>
         </Card>
 

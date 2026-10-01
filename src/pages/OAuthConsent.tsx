@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FullPageLoader } from "@/components/ui/FullPageLoader";
+import { LifeSyncLogo } from "@/components/branding/LifeSyncLogo";
 
 type OAuthNamespace = {
   getAuthorizationDetails: (id: string) => Promise<{ data: any; error: any }>;
@@ -103,7 +104,7 @@ export default function OAuthConsent() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2">
           <div className="flex items-center gap-3">
-            <img src="/icon-192.png" alt="LifeSync logo" className="h-10 w-10 rounded-xl" />
+            <LifeSyncLogo size="sm" />
             <CardTitle className="text-xl">Connect {clientName}</CardTitle>
           </div>
           <CardDescription>

@@ -12,6 +12,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FullPageLoader } from '@/components/ui/FullPageLoader';
+import { LifeSyncLogo } from '@/components/branding/LifeSyncLogo';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -126,7 +127,7 @@ export default function Auth() {
   });
 
   const handleSignup = signupForm.handleSubmit(async (values) => {
-    const { error } = await signUp(values.email, values.password, values.fullName, nextPath);
+    const { data, error } = await signUp(values.email, values.password, values.fullName, nextPath);
 
     if (error) {
       toast({
@@ -137,9 +138,12 @@ export default function Auth() {
       return;
     }
 
-    toast({
+    toast(data.session ? {
       title: 'Welcome!',
-      description: 'Account created successfully.',
+      description: 'Your account is ready.',
+    } : {
+      title: 'Check your email',
+      description: 'Open the confirmation link to activate your LifeSync account.',
     });
     signupForm.reset();
     setActiveTab('login');
@@ -163,7 +167,7 @@ export default function Auth() {
 
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-4">
-            <img src="/icon-192.png" alt="LifeSync logo" className="h-12 w-12 rounded-2xl object-cover shadow-lg" />
+            <LifeSyncLogo size="lg" className="shadow-xl ring-white/20" />
             <h1 className="text-3xl font-bold text-white">LifeSync</h1>
           </div>
           <p className="text-white/80 text-lg">Your personal life management companion</p>
@@ -199,7 +203,7 @@ export default function Auth() {
         <div className="w-full max-w-md">
           <div className="lg:hidden text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-2">
-              <img src="/icon-192.png" alt="LifeSync logo" className="h-10 w-10 rounded-xl object-cover shadow-sm" />
+              <LifeSyncLogo size="md" />
               <h1 className="text-2xl font-bold text-foreground">LifeSync</h1>
             </div>
             <p className="text-muted-foreground">Your life management companion</p>
