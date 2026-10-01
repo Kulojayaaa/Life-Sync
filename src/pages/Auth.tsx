@@ -36,6 +36,23 @@ type LoginValues = z.infer<typeof loginSchema>;
 type MagicLinkValues = z.infer<typeof magicLinkSchema>;
 type SignupValues = z.infer<typeof signupSchema>;
 
+const getAuthErrorMessage = (message: string) => {
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes('failed to fetch') || normalized.includes('fetch failed') || normalized.includes('network')) {
+    return 'Cannot reach the authentication server. Check your internet connection, VPN/firewall settings, and Supabase project URL/key.';
+  }
+
+  if (message === 'Invalid login credentials') {
+    return 'Invalid email or password. Please try again.';
+  }
+
+  if (normalized.includes('already registered')) {
+    return 'This email is already registered. Please login instead.';
+  }
+
+  return message;
+};
 export default function Auth() {
   const { signIn, signInWithMagicLink, signUp, loading } = useAuth();
   const { toast } = useToast();
@@ -76,7 +93,7 @@ export default function Auth() {
     if (error) {
       toast({
         title: 'Magic Link Failed',
-        description: error.message,
+        description: getAuthErrorMessage(error.message),
         variant: 'destructive',
       });
       return;
@@ -95,9 +112,7 @@ export default function Auth() {
     if (error) {
       toast({
         title: 'Login Failed',
-        description: error.message === 'Invalid login credentials'
-          ? 'Invalid email or password. Please try again.'
-          : error.message,
+        description: getAuthErrorMessage(error.message),
         variant: 'destructive',
       });
       return;
@@ -114,12 +129,9 @@ export default function Auth() {
     const { error } = await signUp(values.email, values.password, values.fullName, nextPath);
 
     if (error) {
-      const message = error.message.includes('already registered')
-        ? 'This email is already registered. Please login instead.'
-        : error.message;
       toast({
         title: 'Signup Failed',
-        description: message,
+        description: getAuthErrorMessage(error.message),
         variant: 'destructive',
       });
       return;

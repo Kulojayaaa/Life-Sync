@@ -3,6 +3,11 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useGlobalStore } from '@/store/globalStore';
 
+const toAuthError = (error: unknown) => {
+  if (error instanceof Error) return error;
+  return new Error('Authentication request failed. Please try again.');
+};
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -54,35 +59,46 @@ export function useAuth() {
   }, [setGlobalUser]);
 
   const signUp = async (email: string, password: string, fullName?: string, redirectTo?: string) => {
-    const redirectUrl = `${window.location.origin}${redirectTo ?? '/'}`;
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: { full_name: fullName },
-      },
-    });
-    return { data, error };
+    try {
+      const redirectUrl = `${window.location.origin}${redirectTo ?? '/'}`;
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: { full_name: fullName },
+        },
+      });
+      return { data, error };
+    } catch (error) {
+      return { data: null, error: toAuthError(error) };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    return { data, error };
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      return { data, error };
+    } catch (error) {
+      return { data: null, error: toAuthError(error) };
+    }
   };
 
   const signInWithMagicLink = async (email: string, redirectTo?: string) => {
-    const redirectUrl = `${window.location.origin}${redirectTo ?? '/'}`;
-    const { data, error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: redirectUrl,
-        shouldCreateUser: true,
-      },
-    });
-    return { data, error };
+    try {
+      const redirectUrl = `${window.location.origin}${redirectTo ?? '/'}`;
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: redirectUrl,
+          shouldCreateUser: true,
+        },
+      });
+      return { data, error };
+    } catch (error) {
+      return { data: null, error: toAuthError(error) };
+    }
   };
-
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
