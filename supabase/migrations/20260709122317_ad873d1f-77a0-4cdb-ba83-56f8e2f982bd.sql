@@ -1,10 +1,4 @@
-
-REVOKE EXECUTE ON FUNCTION public.recalculate_account_current_balance(uuid) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.refresh_account_current_balance_from_transaction() FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
-
--- get_all_users: restrict to service_role; admin UI should call via a secured path.
-REVOKE EXECUTE ON FUNCTION public.get_all_users() FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.get_all_users() TO service_role;
-
--- has_role remains executable by authenticated because it is referenced by RLS policies.
+-- No-op placeholder for an existing remote Supabase migration version.
+-- The consolidated baseline for new environments is 20260902000000_lifesync_clean_schema.sql.
+-- Original SQL preserved in supabase/migrations_archive/20260709122317_ad873d1f-77a0-4cdb-ba83-56f8e2f982bd.sql.
+SELECT 1;

@@ -1,6 +1,4 @@
--- Allow separate self and family budgets for the same category/month.
-
-DROP INDEX IF EXISTS public.budgets_user_category_period_idx;
-
-CREATE UNIQUE INDEX IF NOT EXISTS budgets_user_category_type_period_idx
-ON public.budgets(user_id, category_id, type, month, year, period);
+-- No-op placeholder for an existing remote Supabase migration version.
+-- The consolidated baseline for new environments is 20260902000000_lifesync_clean_schema.sql.
+-- Original SQL preserved in supabase/migrations_archive/20260509000000_budget_type_uniqueness.sql.
+SELECT 1;

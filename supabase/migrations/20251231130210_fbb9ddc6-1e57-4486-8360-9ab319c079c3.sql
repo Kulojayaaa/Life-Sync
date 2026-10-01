@@ -1,12 +1,4 @@
--- Add new columns to habits table for period-based tracking
-ALTER TABLE public.habits 
-ADD COLUMN start_date date,
-ADD COLUMN end_date date,
-ADD COLUMN skip_weekends boolean DEFAULT false,
-ADD COLUMN skip_holidays boolean DEFAULT false,
-ADD COLUMN custom_skip_days text[] DEFAULT '{}',
-ADD COLUMN goal text;
-
--- Update target_count to be nullable (will be calculated from period)
-ALTER TABLE public.habits 
-ALTER COLUMN target_count DROP DEFAULT;
+-- No-op placeholder for an existing remote Supabase migration version.
+-- The consolidated baseline for new environments is 20260902000000_lifesync_clean_schema.sql.
+-- Original SQL preserved in supabase/migrations_archive/20251231130210_fbb9ddc6-1e57-4486-8360-9ab319c079c3.sql.
+SELECT 1;
