@@ -47,3 +47,5 @@ tsc_output.txt
 *.njsproj
 *.sln
 *.sw?
+
+.vercel
