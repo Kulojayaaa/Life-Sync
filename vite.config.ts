@@ -8,7 +8,13 @@ import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
-  const supabaseUrl = env.VITE_SUPABASE_URL || env.SUPABASE_URL || "";
+  const supabaseProjectUrl = env.VITE_SUPABASE_URL || env.SUPABASE_URL || "";
+  const supabaseApiUrl =
+    env.VITE_SUPABASE_API_URL ||
+    env.SUPABASE_API_URL ||
+    env.VITE_SUPABASE_CUSTOM_DOMAIN ||
+    env.SUPABASE_CUSTOM_DOMAIN ||
+    supabaseProjectUrl;
   const supabasePublishableKey =
     env.VITE_SUPABASE_PUBLISHABLE_KEY ||
     env.SUPABASE_PUBLISHABLE_KEY ||
@@ -16,10 +22,10 @@ export default defineConfig(({ mode }) => {
     env.SUPABASE_ANON_KEY ||
     "";
 
-  if (mode === "production" && (!supabaseUrl || !supabasePublishableKey)) {
+  if (mode === "production" && (!supabaseApiUrl || !supabasePublishableKey)) {
     // Fail the build rather than shipping a bundle that crashes at load.
     throw new Error(
-      "Missing VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY — set them in .env before building.",
+      "Missing VITE_SUPABASE_URL (or VITE_SUPABASE_API_URL) or VITE_SUPABASE_PUBLISHABLE_KEY — set them in .env before building.",
     );
   }
 
@@ -34,13 +40,14 @@ export default defineConfig(({ mode }) => {
       {
         name: "inject-runtime-env",
         transformIndexHtml(html: string) {
-          if (!supabaseUrl || !supabasePublishableKey) return html;
+          if (!supabaseApiUrl || !supabasePublishableKey) return html;
           // Exposes the same public keys at runtime so self-hosted builds can
           // override them by defining window.__ENV before the app script.
           return html.replace(
             "<head>",
             `<head>\n    <script>window.__ENV=window.__ENV||${JSON.stringify({
-              VITE_SUPABASE_URL: supabaseUrl,
+              VITE_SUPABASE_API_URL: supabaseApiUrl,
+              VITE_SUPABASE_URL: supabaseProjectUrl || supabaseApiUrl,
               VITE_SUPABASE_PUBLISHABLE_KEY: supabasePublishableKey,
             })};</script>`,
           );
@@ -49,7 +56,8 @@ export default defineConfig(({ mode }) => {
       mode === "development" && componentTagger(),
     ].filter(Boolean),
     define: {
-      "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(supabaseUrl),
+      "import.meta.env.VITE_SUPABASE_API_URL": JSON.stringify(supabaseApiUrl),
+      "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(supabaseProjectUrl || supabaseApiUrl),
       "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(supabasePublishableKey),
       "import.meta.env.VITE_SUPABASE_ANON_KEY": JSON.stringify(supabasePublishableKey),
     },

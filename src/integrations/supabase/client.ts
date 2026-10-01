@@ -2,12 +2,41 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+type PublicRuntimeEnv = {
+  VITE_SUPABASE_API_URL?: string;
+  VITE_SUPABASE_URL?: string;
+  VITE_SUPABASE_PUBLISHABLE_KEY?: string;
+  VITE_SUPABASE_ANON_KEY?: string;
+};
+
+declare global {
+  interface Window {
+    __ENV?: PublicRuntimeEnv;
+  }
+}
+
+function configuredValue(...values: Array<string | undefined>): string {
+  return values.find((value) => value?.trim())?.trim() ?? '';
+}
+
+const runtimeEnv = typeof window !== 'undefined' ? window.__ENV : undefined;
+
+const SUPABASE_URL = configuredValue(
+  runtimeEnv?.VITE_SUPABASE_API_URL,
+  import.meta.env.VITE_SUPABASE_API_URL,
+  runtimeEnv?.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_URL,
+);
+const SUPABASE_PUBLISHABLE_KEY = configuredValue(
+  runtimeEnv?.VITE_SUPABASE_PUBLISHABLE_KEY,
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+  runtimeEnv?.VITE_SUPABASE_ANON_KEY,
+  import.meta.env.VITE_SUPABASE_ANON_KEY,
+);
 
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
   throw new Error(
-    'Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to your .env file.',
+    'Supabase is not configured. Add VITE_SUPABASE_URL (or VITE_SUPABASE_API_URL) and VITE_SUPABASE_PUBLISHABLE_KEY to your .env file.',
   );
 }
 

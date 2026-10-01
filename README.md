@@ -24,16 +24,19 @@ Production-ready personal finance + life-tracker app built with Vite, React, Typ
 
    ```env
    VITE_SUPABASE_URL=https://your-project.supabase.co
-  VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+   VITE_SUPABASE_API_URL=
+   VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
    ```
 
-3. Start the app:
+3. If `*.supabase.co` is blocked on your network, configure a Supabase custom domain such as `https://api.example.com` and set `VITE_SUPABASE_API_URL` to that domain. Keep `VITE_SUPABASE_URL` as the original project URL so project metadata and auth issuer checks still know the Supabase project ref.
+
+4. Start the app:
 
    ```sh
    npm run dev
    ```
 
-4. Build for production:
+5. Build for production:
 
    ```sh
    npm run build
@@ -66,6 +69,7 @@ The included `vercel.json` configures the Vite build, SPA route fallback, servic
    ```env
    VITE_SUPABASE_PROJECT_ID=your-project-ref
    VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+   VITE_SUPABASE_API_URL=https://api.example.com
    VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
    VITE_APP_URL=https://your-project.vercel.app
    ```

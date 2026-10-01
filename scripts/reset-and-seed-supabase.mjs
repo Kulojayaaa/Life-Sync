@@ -15,14 +15,20 @@ function loadEnvFile() {
 
 loadEnvFile();
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseUrl =
+  process.env.SUPABASE_API_URL ||
+  process.env.VITE_SUPABASE_API_URL ||
+  process.env.SUPABASE_CUSTOM_DOMAIN ||
+  process.env.VITE_SUPABASE_CUSTOM_DOMAIN ||
+  process.env.SUPABASE_URL ||
+  process.env.VITE_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const email = process.env.SAMPLE_USER_EMAIL;
 const password = process.env.SAMPLE_USER_PASSWORD;
 
 if (!supabaseUrl || !serviceRoleKey || !email || !password) {
   throw new Error(
-    'Missing VITE_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SAMPLE_USER_EMAIL, or SAMPLE_USER_PASSWORD',
+    'Missing Supabase API URL, SUPABASE_SERVICE_ROLE_KEY, SAMPLE_USER_EMAIL, or SAMPLE_USER_PASSWORD',
   );
 }
 

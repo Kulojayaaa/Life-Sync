@@ -14,8 +14,18 @@ loadEnvFile();
 const email = process.env.SAMPLE_USER_EMAIL;
 const password = process.env.SAMPLE_USER_PASSWORD;
 const vaultKey = process.env.SAMPLE_VAULT_KEY || 'LifeSyncDemoVault2026';
-const url = process.env.VITE_SUPABASE_URL;
-const publishableKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const url =
+  process.env.SUPABASE_API_URL ||
+  process.env.VITE_SUPABASE_API_URL ||
+  process.env.SUPABASE_CUSTOM_DOMAIN ||
+  process.env.VITE_SUPABASE_CUSTOM_DOMAIN ||
+  process.env.SUPABASE_URL ||
+  process.env.VITE_SUPABASE_URL;
+const publishableKey =
+  process.env.SUPABASE_PUBLISHABLE_KEY ||
+  process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  process.env.VITE_SUPABASE_ANON_KEY;
 
 if (!email || !password || !url || !publishableKey) {
   throw new Error('Missing demo credentials or Supabase public configuration.');

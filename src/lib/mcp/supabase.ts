@@ -20,8 +20,19 @@ function configuredEnv(names: readonly string[]): string | undefined {
 }
 
 function supabaseProjectUrl(): string {
-  const url = configuredEnv(["SUPABASE_URL", "VITE_SUPABASE_URL"]);
-  if (!url) throw new Error("SUPABASE_URL (or VITE_SUPABASE_URL) is required");
+  const url = configuredEnv([
+    "SUPABASE_API_URL",
+    "VITE_SUPABASE_API_URL",
+    "SUPABASE_CUSTOM_DOMAIN",
+    "VITE_SUPABASE_CUSTOM_DOMAIN",
+    "SUPABASE_URL",
+    "VITE_SUPABASE_URL",
+  ]);
+  if (!url) {
+    throw new Error(
+      "SUPABASE_API_URL, SUPABASE_URL, or VITE_SUPABASE_URL is required",
+    );
+  }
   return url;
 }
 

@@ -13,11 +13,21 @@ loadEnvFile();
 
 const email = process.env.SAMPLE_USER_EMAIL;
 const password = process.env.SAMPLE_USER_PASSWORD;
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const supabaseUrl =
+  process.env.SUPABASE_API_URL ||
+  process.env.VITE_SUPABASE_API_URL ||
+  process.env.SUPABASE_CUSTOM_DOMAIN ||
+  process.env.VITE_SUPABASE_CUSTOM_DOMAIN ||
+  process.env.SUPABASE_URL ||
+  process.env.VITE_SUPABASE_URL;
+const supabaseKey =
+  process.env.SUPABASE_PUBLISHABLE_KEY ||
+  process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  process.env.VITE_SUPABASE_ANON_KEY;
 
 if (!email || !password || !supabaseUrl || !supabaseKey) {
-  throw new Error('Missing SAMPLE_USER_EMAIL, SAMPLE_USER_PASSWORD, VITE_SUPABASE_URL, or VITE_SUPABASE_PUBLISHABLE_KEY');
+  throw new Error('Missing SAMPLE_USER_EMAIL, SAMPLE_USER_PASSWORD, Supabase API URL, or Supabase publishable key');
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
