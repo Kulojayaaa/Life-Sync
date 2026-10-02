@@ -43,6 +43,14 @@ const SUPABASE_PUBLISHABLE_KEY = configuredValue(
   import.meta.env.VITE_SUPABASE_ANON_KEY,
 );
 
+export const supabaseRealtimeEnabled = (() => {
+  try {
+    return new URL(SUPABASE_URL).pathname.replace(/\/+$/, '') === '';
+  } catch {
+    return true;
+  }
+})();
+
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
   throw new Error(
     'Supabase is not configured. Add VITE_SUPABASE_URL (or VITE_SUPABASE_API_URL) and VITE_SUPABASE_PUBLISHABLE_KEY to your .env file.',

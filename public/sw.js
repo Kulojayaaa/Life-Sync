@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lifesync-v3';
+const CACHE_NAME = 'lifesync-v4';
 const APP_SHELL = ['/', '/manifest.json', '/favicon.ico'];
 
 self.addEventListener('install', (event) => {
@@ -20,12 +20,21 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
   const isSameOrigin = url.origin === self.location.origin;
+  const isSupabaseProxy = isSameOrigin && url.pathname.startsWith('/supabase/');
   const isVersionedAsset = isSameOrigin && url.pathname.startsWith('/assets/');
+
+  if (isSupabaseProxy) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
 
   if (isVersionedAsset || event.request.destination === 'script' || event.request.destination === 'style') {
     event.respondWith(
       caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
-        if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
+        if (response.ok) {
+          const copy = response.clone();
+          event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)));
+        }
         return response;
       })),
     );
@@ -40,13 +49,6 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        if (!isSameOrigin || !response.ok) return response;
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-        return response;
-      })
-      .catch(() => caches.match(event.request)),
+    fetch(event.request).catch(() => caches.match(event.request)),
   );
 });
