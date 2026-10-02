@@ -1,29 +1,29 @@
-import { Bell, FileText, Flag, KeyRound, Menu, Package, Receipt, Settings, Target } from 'lucide-react';
+import { Download, KeyRound, LogOut, Menu, Package, Settings, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
-
-const items = [
-  ['/goals', 'Goals', Flag],
-  ['/habits', 'Habits', Target],
-  ['/bills', 'Bills', Receipt],
-  ['/notes', 'Notes', FileText],
-  ['/reminders', 'Reminders', Bell],
-  ['/products', 'Products', Package],
-  ['/vault', 'Vault', KeyRound],
-  ['/settings', 'Settings', Settings],
-] as const;
+import { useAuth } from '@/hooks/useAuth';
 
 interface MoreMenuSheetProps {
   trigger: React.ReactNode;
 }
 
-/**
- * More-menu overlay used by the mobile bottom nav. Renders as a sheet
- * rather than a routed page so it feels like a native drawer.
- */
 export default function MoreMenuSheet({ trigger }: MoreMenuSheetProps) {
+  const { isAdmin, signOut } = useAuth();
   const [open, setOpen] = useState(false);
+  const items = [
+    ['/products', 'Products', Package],
+    ['/vault', 'Vault', KeyRound],
+    ['/settings', 'Settings', Settings],
+    ['/settings#export', 'Export', Download],
+    ...(isAdmin ? ([['/admin', 'Admin', Shield]] as const) : []),
+  ] as const;
+
+  const handleSignOut = async () => {
+    setOpen(false);
+    await signOut();
+  };
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
@@ -45,6 +45,14 @@ export default function MoreMenuSheet({ trigger }: MoreMenuSheetProps) {
               <span className="text-xs font-semibold">{label}</span>
             </Link>
           ))}
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border bg-card p-3 text-destructive transition-colors hover:bg-destructive/10"
+          >
+            <LogOut className="h-6 w-6" />
+            <span className="text-xs font-semibold">Sign out</span>
+          </button>
         </div>
       </SheetContent>
     </Sheet>

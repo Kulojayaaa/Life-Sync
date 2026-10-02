@@ -1,6 +1,6 @@
 # LifeSync
 
-Production-ready personal finance + life-tracker app built with Vite, React, TypeScript, Zustand, Supabase, PWA support, and Capacitor Android. Developed on [Lovable](https://lovable.dev) with two-way GitHub sync — Lovable Cloud is the recommended backend for new forks.
+Production-ready personal finance + life-tracker app built with Vite, React, TypeScript, Zustand, Supabase, PWA support, and Capacitor Android.
 
 ## Features
 
@@ -150,3 +150,4 @@ Android Studio path: **Build -> Generate Signed Bundle / APK**.
 | `npm run android:sync` | Build web and sync Android assets |
 | `npm run android:release` | Sync and assemble the signed Android release |
 | `npm run android:open` | Open Android Studio project |
+

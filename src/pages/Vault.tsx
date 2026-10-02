@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Shield, Key, Plus, Copy, Trash2, Eye, EyeOff, Search, ExternalLink, AlertTriangle } from 'lucide-react';
+import { Shield, Key, Plus, Copy, Trash2, Eye, EyeOff, Search, ExternalLink, AlertTriangle, Lock } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
@@ -151,7 +152,7 @@ export default function Vault() {
         <Alert className="bg-primary/5 border-primary/20">
           <AlertTriangle className="h-4 w-4 text-primary" />
           <AlertTitle>Encrypted vault</AlertTitle>
-          <AlertDescription>Your vault key stays in memory only and is cleared when you sign out or close the app.</AlertDescription>
+          <AlertDescription className="flex flex-wrap items-center gap-2">Your vault key stays in memory only and auto-locks after 2 minutes of inactivity. <Badge variant={vaultUnlocked ? "default" : "secondary"}>{vaultUnlocked ? "Unlocked" : "Locked"}</Badge></AlertDescription>
         </Alert>
 
         {!vaultUnlocked && (
@@ -186,6 +187,12 @@ export default function Vault() {
             <p className="text-muted-foreground">Securely store your important credentials</p>
           </div>
           
+          <div className="flex flex-wrap gap-2">
+            {vaultUnlocked && (
+              <Button type="button" variant="outline" onClick={() => lockVault(true)}>
+                <Lock className="w-4 h-4 mr-2" /> Lock
+              </Button>
+            )}
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
               <Button className="gradient-primary" disabled={!vaultUnlocked}>
@@ -247,6 +254,7 @@ export default function Vault() {
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         <div className="relative">
@@ -367,3 +375,7 @@ export default function Vault() {
     </AppLayout>
   );
 }
+
+
+
+

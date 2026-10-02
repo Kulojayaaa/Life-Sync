@@ -1,25 +1,31 @@
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import {
-  LayoutDashboard,
-  Target,
-  Calendar,
-  FileText,
+  Banknote,
+  BarChart3,
   Bell,
-  Settings,
-  LogOut,
+  Calendar,
+  CalendarRange,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Package,
-  Receipt,
-  Shield,
-  Flag,
-  Key,
-  Wallet,
   CreditCard,
+  FileText,
+  Flag,
+  IndianRupee,
+  Key,
   Landmark,
-  BarChart3,
-  CalendarRange,
+  ListTodo,
+  LogOut,
+  MoreHorizontal,
+  Package,
+  PiggyBank,
+  Receipt,
+  Settings,
+  Shield,
+  Target,
+  Utensils,
+  Wallet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -28,24 +34,54 @@ import { resolveSupabaseAssetUrl, supabase } from '@/integrations/supabase/clien
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tables } from '@/integrations/supabase/types';
 import { LifeSyncLogo } from '@/components/branding/LifeSyncLogo';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
-const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-  { icon: Flag, label: 'Goals', path: '/goals' },
-  { icon: Target, label: 'Habits', path: '/habits' },
-  { icon: Wallet, label: 'Transactions', path: '/expenses' },
-  { icon: Wallet, label: 'Accounts', path: '/accounts' },
-  { icon: Target, label: 'Budgets', path: '/budgets' },
-  { icon: CreditCard, label: 'EMI', path: '/emis' },
-  { icon: Landmark, label: 'Debt', path: '/debt' },
-  { icon: CalendarRange, label: 'Planner', path: '/planner' },
-  { icon: BarChart3, label: 'Insights', path: '/insights' },
-  { icon: Package, label: 'Products', path: '/products' },
-  { icon: Receipt, label: 'Bills', path: '/bills' },
-  { icon: Calendar, label: 'Calendar', path: '/calendar' },
-  { icon: FileText, label: 'Notes', path: '/notes' },
-  { icon: Key, label: 'Vault', path: '/vault' },
-  { icon: Bell, label: 'Reminders', path: '/reminders' },
+const navGroups = [
+  {
+    label: 'Today',
+    path: '/',
+    icon: CalendarRange,
+    items: [{ icon: Utensils, label: 'Daily Check-in', path: '/' }],
+  },
+  {
+    label: 'Money',
+    path: '/money',
+    icon: Wallet,
+    items: [
+      { icon: Receipt, label: 'Transactions', path: '/expenses' },
+      { icon: Banknote, label: 'Accounts', path: '/accounts' },
+      { icon: PiggyBank, label: 'Budgets', path: '/budgets' },
+      { icon: Target, label: 'Savings', path: '/savings' },
+      { icon: IndianRupee, label: 'Bills', path: '/bills' },
+      { icon: CreditCard, label: 'EMI', path: '/emis' },
+      { icon: Landmark, label: 'Debt', path: '/debt' },
+      { icon: CalendarRange, label: 'Planner', path: '/planner' },
+      { icon: BarChart3, label: 'Insights', path: '/insights' },
+      { icon: FileText, label: 'Reports', path: '/reports' },
+    ],
+  },
+  {
+    label: 'Plan',
+    path: '/plan',
+    icon: ListTodo,
+    items: [
+      { icon: Calendar, label: 'Calendar', path: '/calendar' },
+      { icon: Bell, label: 'Reminders', path: '/reminders' },
+      { icon: Target, label: 'Habits', path: '/habits' },
+      { icon: Flag, label: 'Goals', path: '/goals' },
+      { icon: FileText, label: 'Notes', path: '/notes' },
+    ],
+  },
+  {
+    label: 'More',
+    path: '/products',
+    icon: MoreHorizontal,
+    items: [
+      { icon: Package, label: 'Products', path: '/products' },
+      { icon: Key, label: 'Vault', path: '/vault' },
+      { icon: Settings, label: 'Settings', path: '/settings' },
+    ],
+  },
 ];
 
 export function Sidebar() {
@@ -110,31 +146,65 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group',
-                isActive
-                  ? 'gradient-primary text-white shadow-glow'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-              )}
-              aria-current={isActive ? 'page' : undefined}
-              aria-label={collapsed ? item.label : undefined}
-            >
-              <item.icon
+        {navGroups.map((group) => {
+          const isGroupActive = group.path === '/'
+            ? location.pathname === '/'
+            : location.pathname === group.path || group.items.some((item) => location.pathname === item.path);
+
+          if (collapsed) {
+            return (
+              <Link
+                key={group.label}
+                to={group.path}
                 className={cn(
-                  'w-5 h-5 flex-shrink-0',
-                  isActive ? 'text-white' : 'text-muted-foreground group-hover:text-foreground'
+                  'flex items-center justify-center rounded-xl px-3 py-2.5 transition-all duration-200',
+                  isGroupActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                 )}
-              />
-              {!collapsed && (
-                <span className="font-medium">{item.label}</span>
-              )}
-            </Link>
+                aria-label={group.label}
+                aria-current={isGroupActive ? 'page' : undefined}
+              >
+                <group.icon className="h-5 w-5" />
+              </Link>
+            );
+          }
+
+          return (
+            <Collapsible key={group.label} defaultOpen={isGroupActive || group.label === 'Money'}>
+              <CollapsibleTrigger asChild>
+                <button
+                  type="button"
+                  className={cn(
+                    'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-200',
+                    isGroupActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                  )}
+                >
+                  <group.icon className="h-5 w-5 flex-shrink-0" />
+                  <span className="flex-1 font-semibold">{group.label}</span>
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="ml-4 mt-1 space-y-1 border-l border-border pl-3">
+                {group.items.map((item) => {
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={cn(
+                        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 group',
+                        isActive
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                      )}
+                      aria-current={isActive ? 'page' : undefined}
+                    >
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      <span className="font-medium">{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </CollapsibleContent>
+            </Collapsible>
           );
         })}
         {isAdmin && (
@@ -143,11 +213,11 @@ export function Sidebar() {
             className={cn(
               'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group mt-4 border border-primary/20',
               location.pathname === '/admin'
-                ? 'gradient-primary text-white shadow-glow'
+                ? 'bg-primary text-primary-foreground shadow-sm'
                 : 'text-primary hover:bg-primary/10'
             )}
           >
-            <Shield className={cn('w-5 h-5 flex-shrink-0', location.pathname === '/admin' ? 'text-white' : 'text-primary')} />
+            <Shield className={cn('w-5 h-5 flex-shrink-0', location.pathname === '/admin' ? 'text-primary-foreground' : 'text-primary')} />
             {!collapsed && <span className="font-medium">Admin Panel</span>}
           </Link>
         )}
@@ -160,7 +230,7 @@ export function Sidebar() {
           className={cn(
             'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200',
             location.pathname === '/settings'
-              ? 'gradient-primary text-white'
+              ? 'bg-primary text-primary-foreground'
               : 'text-muted-foreground hover:bg-muted hover:text-foreground'
           )}
         >
@@ -182,7 +252,7 @@ export function Sidebar() {
               {profile?.avatar_url ? (
                 <img src={resolveSupabaseAssetUrl(profile.avatar_url)} alt="Profile" className="w-full h-full object-cover" />
               ) : (
-                <AvatarFallback className="gradient-primary text-white text-xs">{getInitials(profile?.full_name || null)}</AvatarFallback>
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs">{getInitials(profile?.full_name || null)}</AvatarFallback>
               )}
             </Avatar>
             <div className="min-w-0">
@@ -199,7 +269,7 @@ export function Sidebar() {
               {profile?.avatar_url ? (
                 <img src={resolveSupabaseAssetUrl(profile.avatar_url)} alt="Profile" className="w-full h-full object-cover" />
               ) : (
-                <AvatarFallback className="gradient-primary text-white text-[10px]">{getInitials(profile?.full_name || null)}</AvatarFallback>
+                <AvatarFallback className="bg-primary text-primary-foreground text-[10px]">{getInitials(profile?.full_name || null)}</AvatarFallback>
               )}
             </Avatar>
           </div>
@@ -208,3 +278,5 @@ export function Sidebar() {
     </aside>
   );
 }
+
+

@@ -3,11 +3,12 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type FinanceTransactionType = 'credit' | 'debit' | 'transfer';
 export type SpendingType = 'self' | 'family';
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snacks';
 export type FinanceCategoryType = 'income' | 'expense';
 export type FinanceReferenceType = 'manual' | 'emi' | 'goal' | 'transfer' | 'savings';
 
 export const TRANSACTION_SELECT_WITH_CATEGORY_ID =
-  'id, amount, type, category, category_id, account_id, to_account_id, payment_mode, transaction_date, description, source_module, reference_id, spending_type, created_at';
+  'id, amount, type, category, category_id, account_id, to_account_id, payment_mode, transaction_date, description, source_module, reference_id, spending_type, meal_type, created_at';
 export const TRANSACTION_SELECT_WITH_CATEGORY_ID_BASIC =
   'id, amount, type, category, category_id, account_id, to_account_id, payment_mode, transaction_date, description, created_at';
 export const TRANSACTION_SELECT_LEGACY =
@@ -53,6 +54,7 @@ export interface FinanceTransaction {
   source_module: FinanceReferenceType | null;
   reference_id: string | null;
   spending_type: SpendingType | null;
+  meal_type: MealType | null;
   created_at: string;
 }
 
@@ -364,6 +366,7 @@ export function mapTransactionRow(
     source_module: transaction.source_module ?? 'manual',
     reference_id: transaction.reference_id ?? null,
     spending_type: transaction.spending_type ?? null,
+    meal_type: transaction.meal_type ?? null,
     created_at: transaction.created_at,
   };
 }
@@ -544,3 +547,6 @@ export function createMonthlyPlanDraft(existing: MonthlyPlanEntry | null, income
     remaining_balance: income,
   };
 }
+
+
+

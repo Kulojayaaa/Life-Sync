@@ -25,6 +25,7 @@ export interface TransactionInput {
   paymentMode?: string | null;
   transferAccountId?: string | null;
   spendingType?: 'self' | 'family' | null;
+  mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snacks' | null;
   sourceModule?: 'manual' | 'emi' | 'goal' | 'transfer' | 'savings';
   referenceId?: string | null;
   supportsCategoryIds?: boolean;
@@ -79,6 +80,7 @@ const transactionPayload = (input: TransactionInput, override?: Partial<Transact
     to_account_id: merged.type === 'transfer' ? merged.transferAccountId : null,
     transfer_account_id: merged.type === 'transfer' ? merged.transferAccountId : null,
     spending_type: merged.type === 'debit' ? merged.spendingType || 'self' : null,
+    meal_type: merged.mealType || null,
     source_module: merged.sourceModule || 'manual',
     reference_type: referenceType,
     reference_id: merged.referenceId || null,
@@ -336,3 +338,6 @@ export async function addGoalContribution(params: {
 
   return transactionId;
 }
+
+
+

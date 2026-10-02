@@ -426,6 +426,7 @@ export type Database = {
       emis: {
         Row: {
           account_id: string | null
+          affects_balance: boolean
           auto_create_transaction: boolean
           created_at: string
           due_date: string | null
@@ -451,6 +452,7 @@ export type Database = {
         }
         Insert: {
           account_id?: string | null
+          affects_balance?: boolean
           auto_create_transaction?: boolean
           created_at?: string
           due_date?: string | null
@@ -476,6 +478,7 @@ export type Database = {
         }
         Update: {
           account_id?: string | null
+          affects_balance?: boolean
           auto_create_transaction?: boolean
           created_at?: string
           due_date?: string | null
@@ -1131,6 +1134,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          meal_type: string | null
           payment_mode: string | null
           reference_id: string | null
           reference_type: string
@@ -1151,6 +1155,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          meal_type?: string | null
           payment_mode?: string | null
           reference_id?: string | null
           reference_type?: string
@@ -1171,6 +1176,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          meal_type?: string | null
           payment_mode?: string | null
           reference_id?: string | null
           reference_type?: string
@@ -1441,3 +1447,5 @@ export const Constants = {
     },
   },
 } as const
+
+

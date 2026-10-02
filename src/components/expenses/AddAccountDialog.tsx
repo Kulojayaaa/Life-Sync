@@ -91,7 +91,7 @@ export function AddAccountDialog({ onAccountAdded }: AddAccountDialogProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label>Account Name</Label>
-            <Input placeholder="e.g., HDFC Savings" {...form.register('name')} />
+            <Input autoFocus placeholder="e.g., HDFC Savings" {...form.register('name')} />
             {form.formState.errors.name && <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>}
           </div>
 
@@ -118,7 +118,7 @@ export function AddAccountDialog({ onAccountAdded }: AddAccountDialogProps) {
 
           <div className="space-y-2">
             <Label>Opening Balance</Label>
-            <Input type="number" step="0.01" {...form.register('initialBalance')} />
+            <Input type="number" inputMode="decimal" step="0.01" {...form.register('initialBalance')} />
             {form.formState.errors.initialBalance && <p className="text-sm text-destructive">{form.formState.errors.initialBalance.message}</p>}
           </div>
 
@@ -157,11 +157,15 @@ export function AddAccountDialog({ onAccountAdded }: AddAccountDialogProps) {
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? 'Adding...' : 'Add Account'}
-          </Button>
+          <div className="sticky bottom-0 -mx-6 bg-background/95 px-6 py-4 backdrop-blur">
+            <Button type="submit" className="h-12 w-full" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting ? 'Adding...' : 'Add Account'}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
   );
 }
+
+

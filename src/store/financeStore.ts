@@ -63,6 +63,7 @@ interface FinanceState {
   deleteSavingsGoal: (id: string) => Promise<void>;
   deleteEmi: (id: string) => Promise<void>;
   toggleEmiPayment: (paymentId: string, isPaid: boolean, accountId?: string) => Promise<void>;
+  updateEmiMode: (emiId: string, affectsBalance: boolean) => Promise<void>;
   adjustSavingsGoal: (id: string, amount: number, action: 'deposit' | 'withdraw') => Promise<void>;
   saveDebtTracker: (payload: {
     month: string;
@@ -268,7 +269,7 @@ async function autoCreateDueEmiTransactions(params: {
     const emi = activeEmis.get(payment.emi_id);
     if (!emi) continue;
 
-    const autoCreate = emi.auto_create_transaction ?? false;
+    const autoCreate = (emi.auto_create_transaction ?? false) && (emi.affects_balance ?? true);
     const accountId = nullableUuid(emi.account_id) || params.accounts[0]?.id || null;
     if (!autoCreate || !accountId) continue;
 
@@ -516,23 +517,31 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     if (!emi) throw new Error('EMI not found');
 
     if (!isPaid) {
-      const sourceAccountId = accountId || nullableUuid(emi.account_id) || accounts[0]?.id;
-      if (!sourceAccountId) throw new Error('Please create an account first');
+      if (emi.affects_balance === false) {
+        const { error } = await supabase
+          .from('emi_payments')
+          .update({ is_paid: true, paid_date: getTodayDate(), transaction_id: null })
+          .eq('id', paymentId);
+        if (error) throw error;
+      } else {
+        const sourceAccountId = accountId || nullableUuid(emi.account_id) || accounts[0]?.id;
+        if (!sourceAccountId) throw new Error('Please create an account first');
 
-      const transactionId = await createEmiTransaction({
-        userId,
-        payment,
-        emi,
-        accountId: sourceAccountId,
-        categoryId: categoryIdByName(categories, 'EMI', 'expense'),
-        supportsCategoryIds: supportsTransactionCategoryIds,
-      });
+        const transactionId = await createEmiTransaction({
+          userId,
+          payment,
+          emi,
+          accountId: sourceAccountId,
+          categoryId: categoryIdByName(categories, 'EMI', 'expense'),
+          supportsCategoryIds: supportsTransactionCategoryIds,
+        });
 
-      const { error } = await supabase
-        .from('emi_payments')
-        .update({ is_paid: true, paid_date: getTodayDate(), transaction_id: transactionId })
-        .eq('id', paymentId);
-      if (error) throw error;
+        const { error } = await supabase
+          .from('emi_payments')
+          .update({ is_paid: true, paid_date: getTodayDate(), transaction_id: transactionId })
+          .eq('id', paymentId);
+        if (error) throw error;
+      }
     } else {
       if (payment.transaction_id) {
         await supabase.from('transactions').delete().eq('id', payment.transaction_id);
@@ -548,6 +557,22 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     await get().refresh(userId);
   },
 
+  updateEmiMode: async (emiId: string, affectsBalance: boolean) => {
+    const userId = get().userId;
+    if (!userId) throw new Error('Not signed in');
+
+    const payload = affectsBalance
+      ? { affects_balance: true }
+      : { affects_balance: false, auto_create_transaction: false };
+
+    const { error } = await supabase
+      .from('emis')
+      .update(payload)
+      .eq('id', emiId);
+    if (error) throw error;
+
+    await get().refresh(userId);
+  },
   adjustSavingsGoal: async (id: string, amount: number, action: 'deposit' | 'withdraw') => {
     const { userId, savingsGoals, categories, supportsTransactionCategoryIds } = get();
     if (!userId) throw new Error('Not signed in');
@@ -633,3 +658,5 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     await get().refresh(userId);
   },
 }));
+
+

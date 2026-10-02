@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Plus } from 'lucide-react';
+import { CreditCard, Plus, ShieldCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -31,6 +31,7 @@ export function AddEmiDialog({ accounts, onEmiAdded }: AddEmiDialogProps) {
   const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [dueDay, setDueDay] = useState('1');
   const [accountId, setAccountId] = useState('');
+  const [affectsBalance, setAffectsBalance] = useState(true);
   const [autoCreateTransaction, setAutoCreateTransaction] = useState(true);
   const [notes, setNotes] = useState('');
 
@@ -56,7 +57,7 @@ export function AddEmiDialog({ accounts, onEmiAdded }: AddEmiDialogProps) {
       const principal = parseFloat(principalAmount);
       const rate = parseFloat(interestRate);
       const months = parseInt(totalMonths);
-      if (!accountId) throw new Error('Please link an account for EMI payments');
+      if (affectsBalance && !accountId) throw new Error('Please link an account for EMI payments');
       const emiAmount = calculateEmi(principal, rate, months);
 
       // Create EMI record
@@ -72,8 +73,9 @@ export function AddEmiDialog({ accounts, onEmiAdded }: AddEmiDialogProps) {
           start_date: startDate,
           due_day: parseInt(dueDay),
           notes: notes || null,
-          account_id: accountId,
-          auto_create_transaction: autoCreateTransaction,
+          account_id: affectsBalance ? accountId : null,
+          affects_balance: affectsBalance,
+          auto_create_transaction: affectsBalance ? autoCreateTransaction : false,
           next_due_date: startDate,
         })
         .select()
@@ -141,6 +143,7 @@ export function AddEmiDialog({ accounts, onEmiAdded }: AddEmiDialogProps) {
     setStartDate(format(new Date(), 'yyyy-MM-dd'));
     setDueDay('1');
     setAccountId('');
+    setAffectsBalance(true);
     setAutoCreateTransaction(true);
     setNotes('');
   };
@@ -167,6 +170,16 @@ export function AddEmiDialog({ accounts, onEmiAdded }: AddEmiDialogProps) {
           <DialogTitle>Add New EMI</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-2 rounded-xl bg-muted p-1">
+            <Button type="button" variant={affectsBalance ? 'default' : 'ghost'} onClick={() => setAffectsBalance(true)} className="h-auto min-h-14 flex-col gap-1 py-2">
+              <CreditCard className="h-4 w-4" />
+              <span>Deduct from account</span>
+            </Button>
+            <Button type="button" variant={!affectsBalance ? 'default' : 'ghost'} onClick={() => { setAffectsBalance(false); setAutoCreateTransaction(false); }} className="h-auto min-h-14 flex-col gap-1 py-2">
+              <ShieldCheck className="h-4 w-4" />
+              <span>Track only</span>
+            </Button>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="name">EMI Name</Label>
             <Input
@@ -241,29 +254,37 @@ export function AddEmiDialog({ accounts, onEmiAdded }: AddEmiDialogProps) {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Payment Account</Label>
-            <Select value={accountId} onValueChange={setAccountId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select account" />
-              </SelectTrigger>
-              <SelectContent>
-                {accounts.map((account) => (
-                  <SelectItem key={account.id} value={account.id}>
-                    {account.icon} {account.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {affectsBalance ? (
+            <>
+              <div className="space-y-2">
+                <Label>Payment Account</Label>
+                <Select value={accountId} onValueChange={setAccountId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {accounts.map((account) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        {account.icon} {account.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="rounded-lg border border-border p-3 flex items-center justify-between gap-4">
-            <div>
-              <Label htmlFor="auto-emi">Auto-create due transactions</Label>
-              <p className="text-xs text-muted-foreground">Due EMI payments post as linked debit transactions.</p>
+              <div className="rounded-lg border border-border p-3 flex items-center justify-between gap-4">
+                <div>
+                  <Label htmlFor="auto-emi">Auto-create due transactions</Label>
+                  <p className="text-xs text-muted-foreground">Due EMI payments post as linked debit transactions.</p>
+                </div>
+                <Switch id="auto-emi" checked={autoCreateTransaction} onCheckedChange={setAutoCreateTransaction} />
+              </div>
+            </>
+          ) : (
+            <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+              Track-only EMIs appear in due lists and outstanding totals, but marking them paid will not change any account balance.
             </div>
-            <Switch id="auto-emi" checked={autoCreateTransaction} onCheckedChange={setAutoCreateTransaction} />
-          </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="notes">Notes (optional)</Label>
@@ -300,7 +321,7 @@ export function AddEmiDialog({ accounts, onEmiAdded }: AddEmiDialogProps) {
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || !accountId} className="gradient-primary text-white">
+            <Button type="submit" disabled={loading || (affectsBalance && !accountId)} className="gradient-primary text-white">
               {loading ? 'Creating...' : 'Create EMI'}
             </Button>
           </div>
@@ -309,3 +330,6 @@ export function AddEmiDialog({ accounts, onEmiAdded }: AddEmiDialogProps) {
     </Dialog>
   );
 }
+
+
+

@@ -13,15 +13,17 @@ interface EmiCardProps {
   emi: Tables<'emis'>;
   payments: Tables<'emi_payments'>[];
   onPaymentToggle: (paymentId: string, isPaid: boolean) => void;
+  onModeChange: (emiId: string, affectsBalance: boolean) => void;
   onDelete: (emiId: string) => void;
 }
 
-export function EmiCard({ emi, payments, onPaymentToggle, onDelete }: EmiCardProps) {
+export function EmiCard({ emi, payments, onPaymentToggle, onModeChange, onDelete }: EmiCardProps) {
   const [expanded, setExpanded] = useState(false);
   const { formatCurrency } = useCurrency();
+  const affectsBalance = emi.affects_balance !== false;
 
   const paidPayments = payments.filter(p => p.is_paid);
-  const progress = (paidPayments.length / payments.length) * 100;
+  const progress = payments.length > 0 ? (paidPayments.length / payments.length) * 100 : 0;
   const totalPaid = paidPayments.reduce((sum, p) => sum + Number(p.principal_component) + Number(p.interest_component), 0);
   const totalAmount = Number(emi.emi_amount) * emi.total_months;
   const remainingAmount = totalAmount - totalPaid;
@@ -31,9 +33,12 @@ export function EmiCard({ emi, payments, onPaymentToggle, onDelete }: EmiCardPro
   return (
     <Card className="border-border">
       <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-3">
           <div>
-            <CardTitle className="text-lg">{emi.name}</CardTitle>
+            <div className="flex flex-wrap items-center gap-2">
+              <CardTitle className="text-lg">{emi.name}</CardTitle>
+              <Badge variant={affectsBalance ? 'default' : 'secondary'}>{affectsBalance ? 'Deducts' : 'Track only'}</Badge>
+            </div>
             <p className="text-sm text-muted-foreground">
               {formatCurrency(Number(emi.principal_amount))} @ {Number(emi.interest_rate)}% p.a.
             </p>
@@ -64,6 +69,15 @@ export function EmiCard({ emi, payments, onPaymentToggle, onDelete }: EmiCardPro
           </div>
         </div>
 
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3">
+          <p className="text-sm text-muted-foreground">
+            {affectsBalance ? 'Paid installments deduct from an account.' : 'Paid installments are tracked without balance changes.'}
+          </p>
+          <Button type="button" size="sm" variant="outline" onClick={() => onModeChange(emi.id, !affectsBalance)}>
+            Switch to {affectsBalance ? 'track only' : 'deduct'}
+          </Button>
+        </div>
+
         <div>
           <div className="flex justify-between text-sm mb-1">
             <span className="text-muted-foreground">Progress</span>
@@ -82,7 +96,7 @@ export function EmiCard({ emi, payments, onPaymentToggle, onDelete }: EmiCardPro
             </div>
             <Button 
               size="sm" 
-              onClick={() => onPaymentToggle(nextPayment.id, nextPayment.is_paid)}
+              onClick={() => onPaymentToggle(nextPayment.id, nextPayment.is_paid ?? false)}
               className="bg-success hover:bg-success/90"
             >
               <Check className="w-4 h-4 mr-1" /> Mark Paid
@@ -126,7 +140,7 @@ export function EmiCard({ emi, payments, onPaymentToggle, onDelete }: EmiCardPro
                   size="sm"
                   variant={payment.is_paid ? 'default' : 'outline'}
                   className={cn(payment.is_paid && 'bg-success hover:bg-success/90')}
-                  onClick={() => onPaymentToggle(payment.id, payment.is_paid)}
+                  onClick={() => onPaymentToggle(payment.id, payment.is_paid ?? false)}
                 >
                   {payment.is_paid ? <Check className="w-4 h-4" /> : 'Pay'}
                 </Button>

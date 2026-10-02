@@ -18,12 +18,15 @@ const Goals = lazy(() => import("./pages/Goals"));
 const Habits = lazy(() => import("./pages/Habits"));
 const Expenses = lazy(() => import("./pages/Expenses"));
 const Money = lazy(() => import("./pages/Money"));
+const Plan = lazy(() => import("./pages/Plan"));
 const Accounts = lazy(() => import("./pages/Accounts"));
 const Budgets = lazy(() => import("./pages/Budgets"));
 const Emis = lazy(() => import("./pages/Emis"));
 const Debt = lazy(() => import("./pages/Debt"));
 const Planner = lazy(() => import("./pages/Planner"));
 const Insights = lazy(() => import("./pages/Insights"));
+const Savings = lazy(() => import("./pages/Savings"));
+const Reports = lazy(() => import("./pages/Reports"));
 const Products = lazy(() => import("./pages/Products"));
 const BillsPage = lazy(() => import("./pages/Bills"));
 const CalendarPage = lazy(() => import("./pages/Calendar"));
@@ -32,7 +35,6 @@ const Reminders = lazy(() => import("./pages/Reminders"));
 const Settings = lazy(() => import("./pages/Settings"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const Vault = lazy(() => import("./pages/Vault"));
-const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 
@@ -77,19 +79,21 @@ const App = () => (
                   <Routes>
                     <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
                     <Route path="/auth/callback" element={<AuthCallback />} />
-                    <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
 
                     <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                     <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
                     <Route path="/habits" element={<ProtectedRoute><Habits /></ProtectedRoute>} />
                     <Route path="/expenses" element={<ProtectedRoute><Expenses /></ProtectedRoute>} />
                     <Route path="/money" element={<ProtectedRoute><Money /></ProtectedRoute>} />
+                    <Route path="/plan" element={<ProtectedRoute><Plan /></ProtectedRoute>} />
                     <Route path="/accounts" element={<ProtectedRoute><Accounts /></ProtectedRoute>} />
                     <Route path="/budgets" element={<ProtectedRoute><Budgets /></ProtectedRoute>} />
                     <Route path="/emis" element={<ProtectedRoute><Emis /></ProtectedRoute>} />
                     <Route path="/debt" element={<ProtectedRoute><Debt /></ProtectedRoute>} />
                     <Route path="/planner" element={<ProtectedRoute><Planner /></ProtectedRoute>} />
                     <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
+                    <Route path="/savings" element={<ProtectedRoute><Savings /></ProtectedRoute>} />
+                    <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
                     <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
                     <Route path="/bills" element={<ProtectedRoute><BillsPage /></ProtectedRoute>} />
                     <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
@@ -111,3 +115,7 @@ const App = () => (
 );
 
 export default App;
+
+
+
+

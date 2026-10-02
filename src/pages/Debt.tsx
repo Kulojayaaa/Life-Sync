@@ -1,2 +1,5 @@
-import Expenses from './Expenses';
-export default function Debt() { return <Expenses initialTab="debt" />; }
+import FinanceWorkspace from '@/components/expenses/FinanceWorkspace';
+
+export default function Debt() {
+  return <FinanceWorkspace initialTab="debt" />;
+}

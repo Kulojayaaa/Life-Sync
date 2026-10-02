@@ -233,7 +233,7 @@ export function AddBudgetDialog({ categories, existingBudgets, onBudgetAdded, su
 
           <div className="space-y-2">
             <Label htmlFor="budget-amount">Budget Amount ({currencySymbol})</Label>
-            <Input id="budget-amount" type="number" step="0.01" {...form.register('amount')} />
+            <Input id="budget-amount" autoFocus inputMode="decimal" type="number" step="0.01" {...form.register('amount')} />
             {form.formState.errors.amount && <p className="text-sm text-destructive">{form.formState.errors.amount.message}</p>}
           </div>
 
@@ -255,7 +255,7 @@ export function AddBudgetDialog({ categories, existingBudgets, onBudgetAdded, su
             {form.watch('carryForward') && (
               <div className="space-y-2">
                 <Label htmlFor="rollover-amount">Rollover Amount ({currencySymbol})</Label>
-                <Input id="rollover-amount" type="number" step="0.01" {...form.register('rolloverAmount')} />
+                <Input id="rollover-amount" inputMode="decimal" type="number" step="0.01" {...form.register('rolloverAmount')} />
                 {form.formState.errors.rolloverAmount && <p className="text-sm text-destructive">{form.formState.errors.rolloverAmount.message}</p>}
               </div>
             )}
@@ -278,7 +278,7 @@ export function AddBudgetDialog({ categories, existingBudgets, onBudgetAdded, su
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="sticky bottom-0 -mx-6 flex justify-end gap-3 bg-background/95 px-6 py-4 backdrop-blur">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
@@ -291,3 +291,4 @@ export function AddBudgetDialog({ categories, existingBudgets, onBudgetAdded, su
     </Dialog>
   );
 }
+
