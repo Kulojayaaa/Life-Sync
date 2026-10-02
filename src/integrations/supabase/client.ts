@@ -19,14 +19,23 @@ function configuredValue(...values: Array<string | undefined>): string {
   return values.find((value) => value?.trim())?.trim() ?? '';
 }
 
+function resolveSupabaseUrl(value: string): string {
+  const trimmed = value.trim().replace(/\/+$/, '');
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith('/') && typeof window !== 'undefined') {
+    return new URL(trimmed, window.location.origin).toString().replace(/\/+$/, '');
+  }
+  return trimmed;
+}
+
 const runtimeEnv = typeof window !== 'undefined' ? window.__ENV : undefined;
 
-const SUPABASE_URL = configuredValue(
+const SUPABASE_URL = resolveSupabaseUrl(configuredValue(
   runtimeEnv?.VITE_SUPABASE_API_URL,
   import.meta.env.VITE_SUPABASE_API_URL,
   runtimeEnv?.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_URL,
-);
+));
 const SUPABASE_PUBLISHABLE_KEY = configuredValue(
   runtimeEnv?.VITE_SUPABASE_PUBLISHABLE_KEY,
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,

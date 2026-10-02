@@ -9,12 +9,18 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
   const supabaseProjectUrl = env.VITE_SUPABASE_URL || env.SUPABASE_URL || "";
-  const supabaseApiUrl =
+  const configuredSupabaseApiUrl =
     env.VITE_SUPABASE_API_URL ||
     env.SUPABASE_API_URL ||
     env.VITE_SUPABASE_CUSTOM_DOMAIN ||
     env.SUPABASE_CUSTOM_DOMAIN ||
-    supabaseProjectUrl;
+    "";
+  const supabaseApiUrl =
+    mode === "production" &&
+    supabaseProjectUrl &&
+    (!configuredSupabaseApiUrl || configuredSupabaseApiUrl === supabaseProjectUrl)
+      ? "/supabase"
+      : configuredSupabaseApiUrl || supabaseProjectUrl;
   const supabasePublishableKey =
     env.VITE_SUPABASE_PUBLISHABLE_KEY ||
     env.SUPABASE_PUBLISHABLE_KEY ||
@@ -33,6 +39,15 @@ export default defineConfig(({ mode }) => {
     server: {
       host: "::",
       port: 8080,
+      proxy: supabaseProjectUrl
+        ? {
+            "/supabase": {
+              target: supabaseProjectUrl,
+              changeOrigin: true,
+              rewrite: (requestPath) => requestPath.replace(/^\/supabase/, ""),
+            },
+          }
+        : undefined,
     },
     plugins: [
       react(),
