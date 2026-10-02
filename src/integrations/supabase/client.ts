@@ -85,6 +85,32 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
+
+export function resolveSupabaseAssetUrl(value: string | null | undefined): string | undefined {
+  if (!value) return undefined;
+
+  try {
+    const originalUrl = new URL(value);
+    const projectUrl = new URL(configuredValue(
+      runtimeEnv?.VITE_SUPABASE_URL,
+      import.meta.env.VITE_SUPABASE_URL,
+    ));
+    const apiUrl = new URL(SUPABASE_URL);
+
+    if (
+      originalUrl.origin === projectUrl.origin &&
+      typeof window !== 'undefined' &&
+      apiUrl.origin === window.location.origin &&
+      apiUrl.pathname !== '/'
+    ) {
+      return `${apiUrl.origin}${apiUrl.pathname}${originalUrl.pathname}${originalUrl.search}${originalUrl.hash}`;
+    }
+  } catch {
+    return value;
+  }
+
+  return value;
+}
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   global: {
     fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY),

@@ -24,7 +24,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { resolveSupabaseAssetUrl, supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tables } from '@/integrations/supabase/types';
 import { LifeSyncLogo } from '@/components/branding/LifeSyncLogo';
@@ -180,7 +180,7 @@ export function Sidebar() {
           <div className="mt-4 p-3 bg-muted/50 rounded-xl flex items-center gap-3">
             <Avatar className="w-10 h-10 border border-primary/10">
               {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                <img src={resolveSupabaseAssetUrl(profile.avatar_url)} alt="Profile" className="w-full h-full object-cover" />
               ) : (
                 <AvatarFallback className="gradient-primary text-white text-xs">{getInitials(profile?.full_name || null)}</AvatarFallback>
               )}
@@ -197,7 +197,7 @@ export function Sidebar() {
           <div className="mt-4 flex justify-center">
             <Avatar className="w-8 h-8 border border-primary/10">
               {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                <img src={resolveSupabaseAssetUrl(profile.avatar_url)} alt="Profile" className="w-full h-full object-cover" />
               ) : (
                 <AvatarFallback className="gradient-primary text-white text-[10px]">{getInitials(profile?.full_name || null)}</AvatarFallback>
               )}

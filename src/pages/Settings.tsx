@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { supabase } from '@/integrations/supabase/client';
+import { resolveSupabaseAssetUrl, supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrency, CurrencyCode } from '@/hooks/CurrencyContext';
 import { useTheme, Theme } from '@/hooks/ThemeContext';
@@ -350,7 +350,7 @@ export default function Settings() {
                 <div className="relative group">
                   <Avatar className="w-24 h-24 border-2 border-primary/20">
                     {profile?.avatar_url ? (
-                      <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                      <img src={resolveSupabaseAssetUrl(profile.avatar_url)} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
                       <AvatarFallback className="gradient-primary text-white text-2xl">{getInitials(formData.full_name)}</AvatarFallback>
                     )}

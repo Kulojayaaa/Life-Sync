@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lifesync-v4';
+const CACHE_NAME = 'lifesync-v5';
 const APP_SHELL = ['/', '/manifest.json', '/favicon.ico'];
 
 self.addEventListener('install', (event) => {
@@ -15,6 +15,21 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+function cachedOrError(request) {
+  return caches.match(request).then((cached) => cached || Response.error());
+}
+
+function cacheCopy(request, response) {
+  if (!response.ok) return;
+
+  try {
+    const copy = response.clone();
+    return caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => undefined);
+  } catch {
+    return undefined;
+  }
+}
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
@@ -23,32 +38,29 @@ self.addEventListener('fetch', (event) => {
   const isSupabaseProxy = isSameOrigin && url.pathname.startsWith('/supabase/');
   const isVersionedAsset = isSameOrigin && url.pathname.startsWith('/assets/');
 
-  if (isSupabaseProxy) {
-    event.respondWith(fetch(event.request));
+  if (!isSameOrigin || isSupabaseProxy) {
+    event.respondWith(fetch(event.request).catch(() => Response.error()));
     return;
   }
 
   if (isVersionedAsset || event.request.destination === 'script' || event.request.destination === 'style') {
     event.respondWith(
       caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
-        if (response.ok) {
-          const copy = response.clone();
-          event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)));
-        }
+        event.waitUntil(cacheCopy(event.request, response));
         return response;
-      })),
+      }).catch(() => cachedOrError(event.request))),
     );
     return;
   }
 
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match('/')),
+      fetch(event.request).catch(() => caches.match('/').then((cached) => cached || Response.error())),
     );
     return;
   }
 
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request)),
+    fetch(event.request).catch(() => cachedOrError(event.request)),
   );
 });
