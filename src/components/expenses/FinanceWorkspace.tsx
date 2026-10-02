@@ -49,6 +49,7 @@ import {
   ChevronRight,
   Plus,
   Utensils,
+  Check,
 } from 'lucide-react';
 import { AddAccountDialog } from '@/components/expenses/AddAccountDialog';
 import { AddTransactionDialog } from '@/components/expenses/AddTransactionDialog';
@@ -1845,6 +1846,7 @@ export default function FinanceWorkspace({ initialTab = 'transactions' }: Financ
     </AppLayout>
   );
 }
+
 
 
 

@@ -45,6 +45,33 @@ export default function Vault() {
   // UI state
   const [showPasswordMap, setShowPasswordMap] = useState<Record<string, boolean>>({});
 
+  const lockVault = useCallback((showToast = false) => {
+    setVaultUnlocked(false);
+    setMasterKey('');
+    setPasswords([]);
+    setShowPasswordMap({});
+    setOpen(false);
+    setLoading(false);
+    if (showToast) toast.info('Vault locked');
+  }, []);
+
+  useEffect(() => {
+    if (!vaultUnlocked) return;
+
+    let timer: ReturnType<typeof window.setTimeout>;
+    const resetTimer = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => lockVault(), 2 * 60 * 1000);
+    };
+    const events = ['mousemove', 'keydown', 'click', 'touchstart'];
+
+    resetTimer();
+    events.forEach((event) => window.addEventListener(event, resetTimer));
+    return () => {
+      window.clearTimeout(timer);
+      events.forEach((event) => window.removeEventListener(event, resetTimer));
+    };
+  }, [lockVault, vaultUnlocked]);
   useEffect(() => {
     setPasswords([]);
     setShowPasswordMap({});
@@ -375,6 +402,7 @@ export default function Vault() {
     </AppLayout>
   );
 }
+
 
 
 
